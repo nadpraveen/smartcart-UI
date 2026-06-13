@@ -11,6 +11,7 @@ export type FamilyMember = {
   gender: "male" | "female";
   diet: "veg" | "non-veg";
   allergies: string[];
+  isGuest: boolean;
 };
 
 export type Preferences = {
