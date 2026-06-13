@@ -1,0 +1,86 @@
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
+// ===== TYPES =====
+export type Mode = "budget" | "balanced" | "premium";
+export type PlanType = "weekly" | "monthly";
+
+export type FamilyMember = {
+  id: string;
+  age: number;
+  gender: "male" | "female";
+  diet: "veg" | "non-veg";
+  allergies: string[];
+};
+
+export type Preferences = {
+  budget: number;
+  mode: Mode;
+};
+
+type Store = {
+  family: FamilyMember[];
+  preferences: Preferences;
+
+  selectedMembers: string[];
+  planType: PlanType;
+
+  addMember: (member: FamilyMember) => void;
+  updateMember: (member: FamilyMember) => void;
+  deleteMember: (id: string) => void;
+
+  setPreferences: (p: Preferences) => void;
+  setSelectedMembers: (ids: string[]) => void;
+  setPlanType: (type: PlanType) => void;
+};
+
+// ===== STORE =====
+export const useStore = create<Store>()(
+  persist(
+    (set) => ({
+      family: [],
+      preferences: {
+        budget: 2000,
+        mode: "balanced",
+      },
+
+      selectedMembers: [],
+      planType: "monthly",
+
+      addMember: (member) =>
+        set((state) => ({
+          family: [...state.family, member],
+        })),
+
+      updateMember: (updated) =>
+        set((state) => ({
+          family: state.family.map((m) =>
+            m.id === updated.id ? updated : m
+          ),
+        })),
+
+      deleteMember: (id) =>
+        set((state) => ({
+          family: state.family.filter((m) => m.id !== id),
+        })),
+
+      setPreferences: (p) =>
+        set(() => ({
+          preferences: p,
+        })),
+
+      setSelectedMembers: (ids) =>
+        set(() => ({
+          selectedMembers: ids,
+        })),
+
+      setPlanType: (type) =>
+        set(() => ({
+          planType: type,
+        })),
+    }),
+    {
+      name: "smart-cart",
+    }
+  )
+);
