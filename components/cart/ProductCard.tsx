@@ -1,82 +1,68 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, RefreshCw } from "lucide-react";
+import { Plus, Minus, Trash2 } from "lucide-react";
 import { getProductImage } from "@/lib/productImages";
 
 export default function ProductCard({
   item,
   onRemove,
   onUpdateQty,
-  onChangeBrand,
 }: any) {
-  const [showWhy, setShowWhy] = useState(false);
+  const qty = item.quantity || 1;
+  const total = item.price * qty;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-4 space-y-3">
+    <div className="bg-white rounded-2xl shadow-sm p-3 space-y-2">
 
-      {/* TOP */}
-      <div className="flex gap-3">
-
+      {/* IMAGE */}
+      <div className="w-full h-24 rounded-xl overflow-hidden bg-gray-100">
         <img
-          src={getProductImage(item.category)}
-          className="w-16 h-16 rounded-xl object-cover"
+          src={item.image || getProductImage(item)}
+          className="w-full h-full object-cover"
         />
+      </div>
 
-        <div className="flex-1">
-          <p className="text-sm font-medium leading-tight">
-            {item.name}
-          </p>
+      {/* NAME */}
+      <p className="text-sm font-medium leading-tight">
+        {item.name}
+      </p>
 
-          <p className="text-xs text-gray-500 mt-1">
-            ₹{item.price}
-          </p>
+      {/* QUANTITY */}
+      <p className="text-xs text-gray-500">
+        {qty} {item.unit || ""}
+      </p>
+
+      {/* PRICE BREAKDOWN */}
+      <p className="text-xs text-gray-500">
+        ₹{item.price} × {qty}
+      </p>
+
+      <p className="text-sm font-semibold">
+        ₹{total}
+      </p>
+
+      {/* CONTROLS */}
+      <div className="flex justify-between items-center mt-2">
+
+        {/* QTY CONTROL */}
+        <div className="flex items-center gap-2 border rounded-lg px-2 py-1">
+          <button onClick={() => onUpdateQty(item, -1)}>
+            <Minus size={14} />
+          </button>
+
+          <span className="text-sm">{qty}</span>
+
+          <button onClick={() => onUpdateQty(item, +1)}>
+            <Plus size={14} />
+          </button>
         </div>
 
         {/* REMOVE */}
         <button onClick={() => onRemove(item)}>
-          <Trash2 size={16} className="text-gray-400" />
+          <Trash2 size={14} className="text-gray-400" />
         </button>
       </div>
-
-      {/* QUANTITY */}
-      <div className="flex items-center justify-between">
-
-        <div className="flex items-center gap-2 border rounded-xl px-2 py-1">
-          <button onClick={() => onUpdateQty(item, -1)}>-</button>
-          <span className="text-sm">{item.quantity || 1}</span>
-          <button onClick={() => onUpdateQty(item, +1)}>+</button>
-        </div>
-
-        {/* CHANGE BRAND */}
-        <button
-          onClick={() => onChangeBrand(item)}
-          className="text-xs text-primary flex items-center gap-1"
-        >
-          <RefreshCw size={12} />
-          Change
-        </button>
-      </div>
-
-      {/* WHY */}
-      <button
-        onClick={() => setShowWhy(!showWhy)}
-        className="text-xs text-primary"
-      >
-        Why this?
-      </button>
-
-      {showWhy && (
-        <div className="text-xs text-gray-600 bg-muted p-2 rounded-lg">
-          {generateReason(item)}
-        </div>
-      )}
     </div>
   );
-}
-
-function generateReason(item: any) {
-  if (item.category === "protein") return "Added for protein intake";
-  if (item.essential) return "Essential household item";
-  return "Optimized based on your preferences";
 }

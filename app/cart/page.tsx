@@ -8,6 +8,8 @@ import { generateCart } from "@/lib/api/cart";
 import ProductCard from "@/components/cart/ProductCard";
 import Skeleton from "@/components/ui/Skeleton";
 import BrandModal from "@/components/modals/BrandModal";
+import { PieChart, Pie, Tooltip, Cell } from "recharts";
+import CategoryChart from "@/components/charts/CategoryChart";
 
 export default function CartPage() {
   const router = useRouter();
@@ -77,6 +79,33 @@ export default function CartPage() {
     setSelectedItem(null);
   };
 
+  const handleRegenerate = async (mode: any) => {
+    setLoading(true);
+
+    const res = await generateCart({
+      budget: preferences.budget,
+      family,
+      mode, // 🔥 dynamic
+    });
+
+    setCart(res.cart || []);
+    setInsights(res.insights || []);
+    setTotal(res.total || 0);
+    setLoading(false);
+  };
+
+  const categoryStats = Object.keys(grouped).map((cat) => {
+    const totalCat = grouped[cat].reduce(
+      (sum: number, item: any) => sum + item.price * (item.quantity || 1),
+      0,
+    );
+
+    return {
+      category: cat,
+      value: totalCat,
+    };
+  });
+
   // ======================
 
   if (!loading && cart.length === 0) {
@@ -106,16 +135,34 @@ export default function CartPage() {
           <>
             {/* MODE SWITCH */}
             <div className="flex gap-2 mb-4">
-              {["budget", "balanced", "premium"].map((m) => (
-                <button
-                  key={m}
-                  className="flex-1 border rounded-xl p-2 text-sm"
-                >
-                  {m}
-                </button>
-              ))}
-            </div>
+              <button
+                onClick={() => handleRegenerate("budget")}
+                className="flex-1 text-xs bg-gray-100 rounded-xl p-2"
+              >
+                💸 Cheaper
+              </button>
 
+              <button
+                onClick={() => handleRegenerate("balanced")}
+                className="flex-1 text-xs bg-gray-100 rounded-xl p-2"
+              >
+                ⚖️ Balanced
+              </button>
+
+              <button
+                onClick={() => handleRegenerate("premium")}
+                className="flex-1 text-xs bg-gray-100 rounded-xl p-2"
+              >
+                💎 Premium
+              </button>
+            </div>
+            <div className="mb-3 text-xs text-gray-500">
+              {preferences.mode === "balanced"
+                ? "Balanced Plan"
+                : preferences.mode === "budget"
+                  ? "Budget Plan"
+                  : "Premium Plan"}
+            </div>
             {/* CART ITEMS */}
             {Object.keys(grouped).map((cat) => (
               <div key={cat} className="mb-6">
@@ -123,7 +170,7 @@ export default function CartPage() {
                   {cat}
                 </h3>
 
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   {grouped[cat].map((item: any) => (
                     <ProductCard
                       key={`${cat}-${item.name}`}
@@ -136,11 +183,10 @@ export default function CartPage() {
                 </div>
               </div>
             ))}
-
             {/* BUDGET */}
-            <div className="mt-6 p-4 rounded-xl bg-white shadow-sm">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-500">Budget</span>
+            <div className="mt-6 bg-white p-4 rounded-2xl shadow-sm space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Budget Usage</span>
                 <span className="font-medium">
                   ₹{total} / ₹{preferences.budget}
                 </span>
@@ -157,7 +203,14 @@ export default function CartPage() {
                   }}
                 />
               </div>
+
+              <p className="text-xs text-gray-400">
+                {Math.round((total / preferences.budget) * 100)}% used
+              </p>
             </div>
+
+            {/* piChart */}
+            <CategoryChart data={categoryStats} />
 
             {/* INSIGHTS */}
             <div className="mt-6">
@@ -181,17 +234,21 @@ export default function CartPage() {
 
       {/* STICKY FOOTER */}
       {!loading && (
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[420px] w-full bg-white p-4 border-t">
+        <div
+          className="fixed bottom-0 left-1/2 -translate-x-1/2 
+                max-w-[420px] w-full bg-white p-4 border-t"
+        >
           <div className="flex justify-between mb-2">
-            <span>Total</span>
-            <span className="font-semibold">₹{total}</span>
+            <span className="text-sm text-gray-500">Total</span>
+            <span className="font-semibold text-lg">₹{total}</span>
           </div>
 
           <button
-            className="w-full bg-primary text-white p-3 rounded-xl"
             onClick={() => router.push("/checkout")}
+            className="w-full bg-primary text-white p-3 rounded-xl 
+               font-medium active:scale-95 transition"
           >
-            Checkout →
+            Proceed to Checkout →
           </button>
         </div>
       )}
