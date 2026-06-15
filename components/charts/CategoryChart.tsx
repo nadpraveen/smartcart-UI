@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 
 const COLORS = [
@@ -30,17 +24,12 @@ export default function CategoryChart({ data }: any) {
     >
       {/* HEADER */}
       <div>
-        <h3 className="text-sm font-medium">
-          Category Distribution
-        </h3>
-        <p className="text-xs text-gray-400">
-          How your budget is allocated
-        </p>
+        <h3 className="text-sm font-medium">Category Distribution</h3>
+        <p className="text-xs text-gray-400">How your budget is allocated</p>
       </div>
 
       {/* CHART WITH CENTER LABEL */}
       <div className="relative w-full h-52 flex items-center justify-center">
-
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -55,15 +44,19 @@ export default function CategoryChart({ data }: any) {
               animationEasing="ease-out"
             >
               {data.map((_: any, i: number) => (
-                <Cell
-                  key={i}
-                  fill={COLORS[i % COLORS.length]}
-                />
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
 
-            <Tooltip
+            {/* <Tooltip
               formatter={(value: number) => `₹${value}`}
+            /> */}
+
+            <Tooltip
+              formatter={(value) => {
+                if (typeof value !== "number") return value;
+                return `₹${value}`;
+              }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -73,7 +66,6 @@ export default function CategoryChart({ data }: any) {
           <p className="text-xs text-gray-400">Total</p>
           <p className="text-lg font-semibold">₹{total}</p>
         </div>
-
       </div>
 
       {/* LEGEND */}
@@ -93,13 +85,10 @@ export default function CategoryChart({ data }: any) {
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{
-                    backgroundColor:
-                      COLORS[i % COLORS.length],
+                    backgroundColor: COLORS[i % COLORS.length],
                   }}
                 />
-                <span className="capitalize">
-                  {item.category}
-                </span>
+                <span className="capitalize">{item.category}</span>
               </div>
 
               <div className="text-gray-500">
