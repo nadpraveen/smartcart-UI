@@ -13,7 +13,7 @@ import CategoryChart from "@/components/charts/CategoryChart";
 
 export default function CartPage() {
   const router = useRouter();
-  const { family, preferences } = useStore();
+  const { family, preferences, setCartState } = useStore();
 
   const [cart, setCart] = useState<any[]>([]);
   const [insights, setInsights] = useState<string[]>([]);
@@ -33,6 +33,7 @@ export default function CartPage() {
       setInsights(res.insights || []);
       setTotal(res.total || 0);
       setLoading(false);
+      setCartState(res.cart);
     };
 
     fetchCart();
@@ -244,7 +245,7 @@ export default function CartPage() {
           </div>
 
           <button
-            onClick={() => router.push("/checkout")}
+            onClick={() => router.push("/slot")}
             className="w-full bg-primary text-white p-3 rounded-xl 
                font-medium active:scale-95 transition"
           >

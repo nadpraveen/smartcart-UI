@@ -12,12 +12,19 @@ export default function AddMemberModal({
 }) {
   const { addMember, updateMember } = useStore();
 
+  const [name, setName] = useState(existing?.name || "");
   const [age, setAge] = useState(existing?.age || 25);
   const [gender, setGender] = useState(existing?.gender || "male");
   const [diet, setDiet] = useState(existing?.diet || "veg");
   const [isGuest, setIsGuest] = useState(existing?.isGuest || false);
+  const [allergies, setAllergies] = useState<string[]>(
+    existing?.allergies || [],
+  );
+
+  const [showAllergyModal, setShowAllergyModal] = useState(false);
 
   const handleAdd = () => {
+    console.log('allergies', allergies); 
     if (existing) {
       updateMember({
         ...existing,
@@ -29,11 +36,12 @@ export default function AddMemberModal({
     } else {
       addMember({
         id: Date.now().toString(),
+        name,
         age,
         gender,
         diet,
         isGuest,
-        allergies: [],
+        allergies,
       });
     }
     onClose();
@@ -43,6 +51,14 @@ export default function AddMemberModal({
     <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50">
       <div className="bg-white w-full max-w-[420px] rounded-t-2xl p-5">
         <h2 className="text-lg font-semibold mb-4">Add Member</h2>
+        <label className="text-sm text-gray-500">Name:</label>
+        <input
+          type="text"
+          placeholder="Enter name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full p-3 border rounded-xl mb-4"
+        />
 
         {/* Age */}
         <label className="text-sm text-gray-500">Age: {age}</label>
@@ -57,7 +73,7 @@ export default function AddMemberModal({
         />
 
         {/* Gender */}
-        <div className="flex gap-2 mb-4">
+        {/* <div className="flex gap-2 mb-4">
           {["male", "female"].map((g) => (
             <button
               key={g}
@@ -69,10 +85,10 @@ export default function AddMemberModal({
               {g}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Diet */}
-        <div className="flex gap-2 mb-4">
+        {/* <div className="flex gap-2 mb-4">
           {["veg", "non-veg"].map((d) => (
             <button
               key={d}
@@ -84,7 +100,59 @@ export default function AddMemberModal({
               {d}
             </button>
           ))}
+        </div> */}
+
+        <div className="relative grid grid-cols-4 gap-2 mb-4">
+            <div className="absolute top-2 bottom-2 left-1/2 w-px bg-gray-300" />
+          {/* Gender */}
+          <button
+            onClick={() => setGender("male")}
+            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
+              gender === "male" ? "bg-primary text-white" : ""
+            }`}
+          >
+            👨 
+          </button>
+
+          <button
+            onClick={() => setGender("female")}
+            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
+              gender === "female" ? "bg-primary text-white" : ""
+            }`}
+          >
+            👩 
+          </button>
+
+          {/* <div className="absolute top-2 bottom-2 left-1/2 w-px bg-gray-300" /> */}
+
+          {/* Diet */}
+          <button
+            onClick={() => setDiet("veg")}
+            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
+              diet === "veg" ? "bg-primary text-white" : ""
+            }`}
+          >
+            🥦 
+          </button>
+
+          <button
+            onClick={() => setDiet("non-veg")}
+            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
+              diet === "non-veg" ? "bg-primary text-white" : ""
+            }`}
+          >
+            🍗 
+          </button>
         </div>
+
+        <button
+          onClick={() => setShowAllergyModal(true)}
+          className="w-full p-3 border rounded-xl mb-4 text-left"
+        >
+          {allergies.length > 0
+            ? `Allergies: ${allergies.join(", ")}`
+            : "Declare allergies"}
+        </button>
 
         {/* Gust */}
 
@@ -107,6 +175,47 @@ export default function AddMemberModal({
             />
           </button>
         </div>
+
+        {showAllergyModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white p-5 rounded-xl w-[90%] max-w-sm">
+              <h3 className="font-semibold mb-3">Select Allergies</h3>
+
+              {["lactose", "nuts", "gluten"].map((item) => {
+                const active = allergies.includes(item);
+
+                return (
+                  <div
+                    key={item}
+                    className="flex justify-between items-center mb-2"
+                  >
+                    <span>{item}</span>
+
+                    <button
+                      onClick={() => {
+                        if (active) {
+                          setAllergies(allergies.filter((a) => a !== item));
+                        } else {
+                          setAllergies([...allergies, item]);
+                        }
+                      }}
+                      className={`w-10 h-5 rounded-full ${
+                        active ? "bg-primary" : "bg-gray-300"
+                      }`}
+                    />
+                  </div>
+                );
+              })}
+
+              <button
+                onClick={() => setShowAllergyModal(false)}
+                className="mt-4 w-full bg-primary text-white p-2 rounded"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <button

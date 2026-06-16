@@ -49,7 +49,7 @@ export default function FamilyPage() {
               </div>
 
               <div>
-                <p className="font-medium capitalize">{m.gender}</p>
+                <p className="font-medium capitalize">{m.name || m.gender}</p>
                 <p className="text-xs text-gray-500">
                   {m.age} yrs • {m.diet}
                 </p>

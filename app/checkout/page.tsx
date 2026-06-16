@@ -6,7 +6,7 @@ import { useStore } from "@/store/useStore";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { preferences } = useStore();
+const { cartTotal } = useStore();
 
   const handlePay = () => {
     router.push("/processing");
@@ -54,7 +54,7 @@ export default function CheckoutPage() {
           <div className="flex justify-between text-sm">
             <span>Total</span>
             <span className="font-semibold">
-              ₹{preferences.budget}
+              ₹{cartTotal}
             </span>
           </div>
         </div>

@@ -7,6 +7,7 @@ export type PlanType = "weekly" | "monthly";
 
 export type FamilyMember = {
   id: string;
+  name: string;
   age: number;
   gender: "male" | "female";
   diet: "veg" | "non-veg";
@@ -19,12 +20,25 @@ export type Preferences = {
   mode: Mode;
 };
 
+// ✅ NEW: Cart Item Type
+export type CartItem = {
+  name: string;
+  price: number;
+  category?: string;
+  quantity: number;
+};
+
+// ===== STORE TYPE =====
 type Store = {
   family: FamilyMember[];
   preferences: Preferences;
 
   selectedMembers: string[];
   planType: PlanType;
+
+  // ✅ NEW
+  cartState: CartItem[];
+  cartTotal: number;
 
   addMember: (member: FamilyMember) => void;
   updateMember: (member: FamilyMember) => void;
@@ -33,6 +47,9 @@ type Store = {
   setPreferences: (p: Preferences) => void;
   setSelectedMembers: (ids: string[]) => void;
   setPlanType: (type: PlanType) => void;
+
+  // ✅ NEW
+  setCartState: (cart: CartItem[]) => void;
 };
 
 // ===== STORE =====
@@ -48,6 +65,11 @@ export const useStore = create<Store>()(
       selectedMembers: [],
       planType: "monthly",
 
+      // ✅ NEW STATE
+      cartState: [],
+      cartTotal: 0,
+
+      // ===== FAMILY =====
       addMember: (member) =>
         set((state) => ({
           family: [...state.family, member],
@@ -65,6 +87,7 @@ export const useStore = create<Store>()(
           family: state.family.filter((m) => m.id !== id),
         })),
 
+      // ===== PREFERENCES =====
       setPreferences: (p) =>
         set(() => ({
           preferences: p,
@@ -78,6 +101,16 @@ export const useStore = create<Store>()(
       setPlanType: (type) =>
         set(() => ({
           planType: type,
+        })),
+
+      // ===== CART =====
+      setCartState: (cart) =>
+        set(() => ({
+          cart,
+          cartTotal: cart.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          ),
         })),
     }),
     {
