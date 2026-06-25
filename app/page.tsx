@@ -14,7 +14,7 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-    const router = useRouter();
+  const router = useRouter();
   return (
     <MobileContainer>
       <div className="p-4 pb-28 space-y-5">
@@ -64,7 +64,7 @@ export default function HomePage() {
         <div className="grid grid-cols-4 gap-3">
 
           {[
-            { icon: "🛒", label: "Smart Grocery" },
+            { icon: "🛒", label: "Smart Grocery", path: "/onboarding" },
             { icon: "📦", label: "Parcels" },
             { icon: "🚚", label: "Delivery" },
             { icon: "🔁", label: "Repeat" },
@@ -72,13 +72,18 @@ export default function HomePage() {
             { icon: "💰", label: "Budget" },
             { icon: "⚡", label: "Quick Buy" },
             { icon: "👤", label: "Profile" },
+            { icon: "👥", label: "Family", path: "/family" },
+            { icon: "📋", label: "Orders", path: "/orders" },
+            { icon: "✨", label: "Smart Cart", path: "/cart" },
           ].map((item, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl p-3 text-center shadow-sm"
+              onClick={() => item.path && router.push(item.path)}
+              className={`bg-white rounded-xl p-3 text-center shadow-sm transition-all ${item.path ? "cursor-pointer hover:shadow-md active:scale-95" : ""
+                }`}
             >
               <div className="text-2xl mb-1">{item.icon}</div>
-              <p className="text-xs">{item.label}</p>
+              <p className="text-xs font-medium">{item.label}</p>
             </div>
           ))}
 
@@ -96,7 +101,7 @@ export default function HomePage() {
               Plan groceries in seconds
             </p>
 
-            <button className="mt-2 bg-green-500 text-white px-3 py-1 rounded-lg text-xs" onClick={() =>router.push("/onboarding")}>
+            <button className="mt-2 bg-green-500 text-white px-3 py-1 rounded-lg text-xs" onClick={() => router.push("/preferences")}>
               Plan Now →
             </button>
           </div>

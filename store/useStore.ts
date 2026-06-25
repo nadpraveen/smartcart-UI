@@ -28,8 +28,16 @@ export type CartItem = {
   quantity: number;
 };
 
+// ===== USER TYPE =====
+export type User = {
+  name: string;
+  phone: string;
+  isLoggedIn: boolean;
+};
+
 // ===== STORE TYPE =====
 type Store = {
+  user: User;
   family: FamilyMember[];
   preferences: Preferences;
 
@@ -39,6 +47,9 @@ type Store = {
   // ✅ NEW
   cartState: CartItem[];
   cartTotal: number;
+
+  setUser: (user: { name?: string; phone: string }) => void;
+  logout: () => void;
 
   addMember: (member: FamilyMember) => void;
   updateMember: (member: FamilyMember) => void;
@@ -56,6 +67,12 @@ type Store = {
 export const useStore = create<Store>()(
   persist(
     (set) => ({
+      user: {
+        name: "",
+        phone: "",
+        isLoggedIn: false,
+      },
+
       family: [],
       preferences: {
         budget: 2000,
@@ -68,6 +85,17 @@ export const useStore = create<Store>()(
       // ✅ NEW STATE
       cartState: [],
       cartTotal: 0,
+
+      // ===== USER =====
+      setUser: (user) =>
+        set(() => ({
+          user: { name: user.name || "", phone: user.phone, isLoggedIn: true },
+        })),
+
+      logout: () =>
+        set(() => ({
+          user: { name: "", phone: "", isLoggedIn: false },
+        })),
 
       // ===== FAMILY =====
       addMember: (member) =>

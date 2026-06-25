@@ -8,11 +8,12 @@ import { useStore } from "@/store/useStore";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { setUser } = useStore();
 
   const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [mounted, setMounted] = useState(false);
@@ -23,7 +24,7 @@ export default function LoginPage() {
   if (!mounted) return null;
 
   const handleSendOtp = () => {
-    if (phone.length === 10) setStep(2);
+    if (name.length >= 2 && phone.length === 10) setStep(2);
   };
 
   const handleOtpChange = (idx: number, value: string) => {
@@ -41,7 +42,7 @@ export default function LoginPage() {
   };
 
   const handleVerify = () => {
-    setUser({ phone });
+    setUser({ name, phone });
     router.push("/onboarding");
   };
 
@@ -54,10 +55,18 @@ export default function LoginPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-2xl font-semibold mb-2">Welcome back 👋</h1>
+            <h1 className="text-2xl font-semibold mb-2">Create Account 👋</h1>
             <p className="text-gray-500 mb-6 text-sm">
               Smart grocery planning starts here
             </p>
+
+            <input
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full border border-border rounded-xl p-3 mb-3 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition text-sm"
+              autoFocus
+            />
 
             <div
               className="flex items-center border border-border rounded-xl p-3 mb-4
@@ -73,22 +82,21 @@ export default function LoginPage() {
                   setPhone(e.target.value.replace(/\D/g, ""))
                 }
                 className="flex-1 outline-none bg-transparent text-sm"
-                autoFocus
               />
             </div>
 
             <button
               onClick={handleSendOtp}
-              disabled={phone.length !== 10}
+              disabled={name.length < 2 || phone.length !== 10}
               className="bg-primary text-white w-full p-3 rounded-xl font-medium shadow active:scale-95 transition disabled:opacity-50"
             >
               Send OTP
             </button>
 
             <p className="text-sm text-center text-gray-500 mt-6">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="text-primary font-medium">
-                Sign up
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary font-medium">
+                Login
               </Link>
             </p>
           </motion.div>
@@ -136,7 +144,7 @@ export default function LoginPage() {
               disabled={otp.join("").length !== 4}
               className="bg-primary text-white w-full p-3 rounded-xl font-medium shadow active:scale-95 transition disabled:opacity-50"
             >
-              Verify & Login
+              Verify & Sign Up
             </button>
 
             <button
