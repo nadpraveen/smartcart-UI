@@ -13,6 +13,7 @@ export type FamilyMember = {
   diet: "veg" | "non-veg";
   allergies: string[];
   isGuest: boolean;
+  additionalInfo?: string;
 };
 
 export type Preferences = {

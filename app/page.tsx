@@ -64,7 +64,9 @@ export default function HomePage() {
         <div className="grid grid-cols-4 gap-3">
 
           {[
-            { icon: "🛒", label: "Smart Grocery", path: "/onboarding" },
+            { icon: "🛒", label: "Smart Grocery", path: "/cart" },
+            { icon: "👥", label: "Family", path: "/family" },
+            { icon: "📋", label: "Orders", path: "/orders" },
             { icon: "📦", label: "Parcels" },
             { icon: "🚚", label: "Delivery" },
             { icon: "🔁", label: "Repeat" },
@@ -72,9 +74,6 @@ export default function HomePage() {
             { icon: "💰", label: "Budget" },
             { icon: "⚡", label: "Quick Buy" },
             { icon: "👤", label: "Profile" },
-            { icon: "👥", label: "Family", path: "/family" },
-            { icon: "📋", label: "Orders", path: "/orders" },
-            { icon: "✨", label: "Smart Cart", path: "/cart" },
           ].map((item, i) => (
             <div
               key={i}

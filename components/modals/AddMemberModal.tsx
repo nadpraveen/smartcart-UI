@@ -20,6 +20,7 @@ export default function AddMemberModal({
   const [allergies, setAllergies] = useState<string[]>(
     existing?.allergies || [],
   );
+  const [additionalInfo, setAdditionalInfo] = useState(existing?.additionalInfo || "");
 
   const [showAllergyModal, setShowAllergyModal] = useState(false);
 
@@ -28,10 +29,13 @@ export default function AddMemberModal({
     if (existing) {
       updateMember({
         ...existing,
+        name,
         age,
         gender,
         diet,
         isGuest,
+        allergies,
+        additionalInfo,
       });
     } else {
       addMember({
@@ -42,15 +46,16 @@ export default function AddMemberModal({
         diet,
         isGuest,
         allergies,
+        additionalInfo,
       });
     }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-end justify-center z-50">
-      <div className="bg-white w-full max-w-[420px] rounded-t-2xl p-5">
-        <h2 className="text-lg font-semibold mb-4">Add Member</h2>
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+      <div className="bg-white w-full max-w-[400px] max-h-[90vh] overflow-y-auto rounded-2xl p-6 shadow-xl">
+        <h2 className="text-lg font-bold text-gray-900 mb-4">{existing ? "Edit Member" : "Add Member"}</h2>
         <label className="text-sm text-gray-500">Name:</label>
         <input
           type="text"
@@ -102,76 +107,114 @@ export default function AddMemberModal({
           ))}
         </div> */}
 
-        <div className="relative grid grid-cols-4 gap-2 mb-4">
-            <div className="absolute top-2 bottom-2 left-1/2 w-px bg-gray-300" />
-          {/* Gender */}
-          <button
-            onClick={() => setGender("male")}
-            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
-              gender === "male" ? "bg-primary text-white" : ""
-            }`}
-          >
-            👨 
-          </button>
+        {/* Gender Selection */}
+        <div className="mb-4">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Gender</label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setGender("male")}
+              className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                gender === "male"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <span>👨</span>
+              <span className="text-sm font-medium">Male</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setGender("female")}
+              className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                gender === "female"
+                  ? "bg-primary text-white border-primary shadow-sm"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <span>👩</span>
+              <span className="text-sm font-medium">Female</span>
+            </button>
+          </div>
+        </div>
 
-          <button
-            onClick={() => setGender("female")}
-            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
-              gender === "female" ? "bg-primary text-white" : ""
-            }`}
-          >
-            👩 
-          </button>
+        {/* Diet Selection */}
+        <div className="mb-4">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Diet Preference</label>
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setDiet("veg")}
+              className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                diet === "veg"
+                  ? "bg-green-600 text-white border-green-600 shadow-sm"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <span>🥦</span>
+              <span className="text-sm font-medium">Vegetarian</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setDiet("non-veg")}
+              className={`flex-1 p-3 rounded-xl border flex items-center justify-center gap-2 transition-all active:scale-95 ${
+                diet === "non-veg"
+                  ? "bg-red-600 text-white border-red-600 shadow-sm"
+                  : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              <span>🍗</span>
+              <span className="text-sm font-medium">Non-Veg</span>
+            </button>
+          </div>
+        </div>
 
-          {/* <div className="absolute top-2 bottom-2 left-1/2 w-px bg-gray-300" /> */}
-
-          {/* Diet */}
+        {/* Allergies */}
+        <div className="mb-4">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Allergies</label>
           <button
-            onClick={() => setDiet("veg")}
-            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
-              diet === "veg" ? "bg-primary text-white" : ""
-            }`}
+            type="button"
+            onClick={() => setShowAllergyModal(true)}
+            className="w-full p-3 border border-gray-200 bg-white rounded-xl text-left text-sm text-gray-700 flex justify-between items-center hover:bg-gray-50 transition"
           >
-            🥦 
-          </button>
-
-          <button
-            onClick={() => setDiet("non-veg")}
-            className={`p-2 rounded-xl border flex flex-col items-center text-xs ${
-              diet === "non-veg" ? "bg-primary text-white" : ""
-            }`}
-          >
-            🍗 
+            <span>
+              {allergies.length > 0
+                ? `Allergies: ${allergies.join(", ")}`
+                : "Declare allergies (lactose, nuts, gluten...)"}
+            </span>
+            <span className="text-gray-400">➔</span>
           </button>
         </div>
 
-        <button
-          onClick={() => setShowAllergyModal(true)}
-          className="w-full p-3 border rounded-xl mb-4 text-left"
-        >
-          {allergies.length > 0
-            ? `Allergies: ${allergies.join(", ")}`
-            : "Declare allergies"}
-        </button>
+        {/* Additional Info */}
+        <div className="mb-4">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-2">Additional Info / Notes</label>
+          <textarea
+            placeholder="e.g. Diabetic options, organic milk, likes green apples, notes..."
+            value={additionalInfo}
+            onChange={(e) => setAdditionalInfo(e.target.value)}
+            className="w-full p-3 border border-gray-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition text-sm resize-none h-20"
+          />
+        </div>
 
-        {/* Gust */}
-
-        <div className="flex items-center justify-between mb-4">
+        {/* Guest */}
+        <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
           <div>
-            <p className="text-sm font-medium">Guest Member</p>
+            <p className="text-sm font-semibold text-gray-800">Guest Member</p>
             <p className="text-xs text-gray-500">
               Temporary / occasional member
             </p>
           </div>
 
           <button
+            type="button"
             onClick={() => setIsGuest(!isGuest)}
-            className={`w-12 h-6 flex items-center rounded-full p-1 transition
-      ${isGuest ? "bg-primary" : "bg-gray-300"}`}
+            className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-200
+              ${isGuest ? "bg-primary" : "bg-gray-300"}`}
           >
             <div
-              className={`w-4 h-4 bg-white rounded-full shadow transform transition
-        ${isGuest ? "translate-x-6" : ""}`}
+              className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200
+                ${isGuest ? "translate-x-6" : ""}`}
             />
           </button>
         </div>

@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   const handleVerify = () => {
     setUser({ phone });
-    router.push("/onboarding");
+    router.push("/");
   };
 
   return (

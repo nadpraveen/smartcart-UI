@@ -53,11 +53,18 @@ export default function FamilyPage() {
                 <p className="text-xs text-gray-500">
                   {m.age} yrs • {m.diet}
                 </p>
-                {m.isGuest && (
-                  <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">
-                    Guest
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-1 mt-1.5">
+                  {m.isGuest && (
+                    <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded font-medium">
+                      Guest
+                    </span>
+                  )}
+                  {m.additionalInfo && (
+                    <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-100 italic line-clamp-1 max-w-full" title={m.additionalInfo}>
+                      📝 {m.additionalInfo}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Actions */}

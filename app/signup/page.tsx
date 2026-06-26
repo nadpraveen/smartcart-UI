@@ -43,7 +43,7 @@ export default function SignupPage() {
 
   const handleVerify = () => {
     setUser({ name, phone });
-    router.push("/onboarding");
+    router.push("/");
   };
 
   return (

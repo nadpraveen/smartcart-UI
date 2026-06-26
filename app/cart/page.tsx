@@ -7,7 +7,6 @@ import { useStore } from "@/store/useStore";
 import { generateCart } from "@/lib/api/cart";
 import ProductCard from "@/components/cart/ProductCard";
 import Skeleton from "@/components/ui/Skeleton";
-import BrandModal from "@/components/modals/BrandModal";
 import { PieChart, Pie, Tooltip, Cell } from "recharts";
 import CategoryChart from "@/components/charts/CategoryChart";
 
@@ -67,17 +66,48 @@ export default function CartPage() {
     );
   };
 
-  const handleChangeBrand = (item: any) => {
-    setSelectedItem(item);
+  // Sync local cart to store and recalculate total automatically
+  useEffect(() => {
+    const newTotal = cart.reduce((sum, item) => {
+      if (item.dontSuggest) return sum;
+      return sum + item.price * (item.quantity || 1);
+    }, 0);
+    setTotal(newTotal);
+    setCartState(cart.filter(item => !item.dontSuggest));
+  }, [cart, setCartState]);
+
+  const handleSelectBrand = (item: any, selectedAlternative: any) => {
+    setCart((prev) =>
+      prev.map((i) => {
+        if (i.id === item.id) {
+          const oldBrand = {
+            name: i.name,
+            price: i.price,
+            image: i.image || null,
+          };
+          const newAlternatives = [
+            oldBrand,
+            ...(i.alternatives || []).filter((alt: any) => alt.name !== selectedAlternative.name)
+          ];
+          return {
+            ...i,
+            name: selectedAlternative.name,
+            price: selectedAlternative.price,
+            image: selectedAlternative.image || i.image,
+            alternatives: newAlternatives,
+          };
+        }
+        return i;
+      })
+    );
   };
 
-  const handleSelectBrand = (newItem: any) => {
+  const handleToggleDontSuggest = (item: any) => {
     setCart((prev) =>
       prev.map((i) =>
-        i.id === selectedItem.id ? { ...newItem, quantity: i.quantity } : i,
-      ),
+        i.id === item.id ? { ...i, dontSuggest: !i.dontSuggest } : i
+      )
     );
-    setSelectedItem(null);
   };
 
   const handleRegenerate = async (mode: any) => {
@@ -178,7 +208,8 @@ export default function CartPage() {
                       item={item}
                       onRemove={handleRemove}
                       onUpdateQty={handleQty}
-                      onChangeBrand={handleChangeBrand}
+                      onSelectBrand={handleSelectBrand}
+                      onToggleDontSuggest={handleToggleDontSuggest}
                     />
                   ))}
                 </div>
@@ -254,14 +285,7 @@ export default function CartPage() {
         </div>
       )}
 
-      {/* BRAND MODAL */}
-      {selectedItem && (
-        <BrandModal
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-          onSelect={handleSelectBrand}
-        />
-      )}
+      {/* BRAND MODAL REMOVED (INLINE SELECTOR USED) */}
     </MobileContainer>
   );
 }
