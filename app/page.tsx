@@ -12,9 +12,22 @@ import {
   User,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useStore } from "@/store/useStore";
+import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const router = useRouter();
+  const { user } = useStore();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  /* Auth guard — redirect to login if not authenticated */
+  if (!mounted) return null;
+  if (!user.isLoggedIn) {
+    router.push("/login");
+    return null;
+  }
+
   return (
     <MobileContainer>
       <div className="p-4 pb-28 space-y-5">

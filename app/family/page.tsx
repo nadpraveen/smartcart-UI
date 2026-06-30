@@ -6,13 +6,19 @@ import { useState, useEffect } from "react";
 import AddMemberModal from "@/components/modals/AddMemberModal";
 
 export default function FamilyPage() {
-  const { family, deleteMember } = useStore();
+  const { family, familyLoading, familyError, loadFamily, deleteMember } = useStore();
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  /* Load members from backend on mount */
+  useEffect(() => {
+    if (mounted) loadFamily();
+  }, [mounted]);
+
   if (!mounted) return null;
 
   return (
@@ -30,12 +36,31 @@ export default function FamilyPage() {
                         text-white p-5 rounded-2xl shadow-md"
         >
           <p className="text-sm opacity-80">Total Members</p>
-          <p className="text-3xl font-semibold mt-1">{family.length}</p>
+          <p className="text-3xl font-semibold mt-1">
+            {familyLoading ? "..." : family.length}
+          </p>
         </div>
+
+        {/* Loading state */}
+        {familyLoading && (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
+        )}
+
+        {/* Error state */}
+        {familyError && (
+          <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm text-center">
+            {familyError}
+            <button onClick={loadFamily} className="underline ml-2 font-medium">
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* Members Grid */}
         <div className="grid grid-cols-2 gap-4">
-          {family.map((m) => (
+          {!familyLoading && family.map((m) => (
             <div
               key={m.id}
               className="bg-white rounded-2xl p-4 shadow-sm space-y-2"
@@ -81,7 +106,8 @@ export default function FamilyPage() {
 
                 <button
                   onClick={() => deleteMember(m.id)}
-                  className="text-red-500"
+                  className="text-red-500 disabled:opacity-50"
+                  disabled={familyLoading}
                 >
                   Delete
                 </button>
@@ -90,13 +116,23 @@ export default function FamilyPage() {
           ))}
         </div>
 
+        {/* Empty state (no members, not loading) */}
+        {!familyLoading && !familyError && family.length === 0 && (
+          <div className="text-center py-12 text-gray-400">
+            <p className="text-4xl mb-3">👨‍👩‍👧</p>
+            <p className="text-sm">No family members yet</p>
+            <p className="text-xs mt-1">Add your first member below</p>
+          </div>
+        )}
+
         {/* Floating Add */}
         <button
           onClick={() => setOpen(true)}
+          disabled={familyLoading}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 
                      max-w-[360px] w-[90%]
                      bg-primary text-white p-4 rounded-2xl 
-                     font-medium shadow-lg active:scale-95 transition"
+                     font-medium shadow-lg active:scale-95 transition disabled:opacity-50"
         >
           + Add Member
         </button>

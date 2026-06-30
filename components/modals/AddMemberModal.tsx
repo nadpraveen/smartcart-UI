@@ -39,7 +39,6 @@ export default function AddMemberModal({
       });
     } else {
       addMember({
-        id: Date.now().toString(),
         name,
         age,
         gender,

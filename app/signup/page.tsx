@@ -5,17 +5,21 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { setUser } = useStore();
+  const { setUserAfterAuth } = useStore();
 
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -41,9 +45,20 @@ export default function SignupPage() {
     }
   };
 
-  const handleVerify = () => {
-    setUser({ name, phone });
-    router.push("/");
+  /* Submit OTP → call backend register → save tokens → redirect home */
+  const handleVerify = async () => {
+    setError("");
+    setIsLoading(true);
+    try {
+      const data = await authApi.register({ name, phone, otp: otp.join("") });
+      setUserAfterAuth(data);
+      router.push("/");
+    } catch (err) {
+      if (err instanceof ApiError) setError(err.message);
+      else setError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -139,12 +154,17 @@ export default function SignupPage() {
               ))}
             </div>
 
+            {/* Error message */}
+            {error && (
+              <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+            )}
+
             <button
               onClick={handleVerify}
-              disabled={otp.join("").length !== 4}
+              disabled={otp.join("").length !== 4 || isLoading}
               className="bg-primary text-white w-full p-3 rounded-xl font-medium shadow active:scale-95 transition disabled:opacity-50"
             >
-              Verify & Sign Up
+              {isLoading ? "Verifying..." : "Verify & Sign Up"}
             </button>
 
             <button
