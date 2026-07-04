@@ -11,7 +11,7 @@
  * The backend authGuard stays unchanged.
  */
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const TOKEN_COOKIE = "sc_token";
 const REFRESH_COOKIE = "sc_refresh";
 
@@ -126,6 +126,7 @@ async function tryRefresh(refreshToken: string): Promise<boolean> {
 export const apiClient = {
   get:    (path: string)            => request("GET", path),
   post:   (path: string, body?: any) => request("POST", path, body),
+  put:    (path: string, body?: any) => request("PUT", path, body),
   patch:  (path: string, body?: any) => request("PATCH", path, body),
   delete: (path: string, body?: any) => request("DELETE", path, body),
 };

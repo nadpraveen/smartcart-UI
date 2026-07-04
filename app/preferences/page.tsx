@@ -10,78 +10,84 @@ export default function PreferencesPage() {
     preferences,
     family,
     setPreferences,
-    setSelectedMembers,
-    setPlanType,
+    loadPrefs,
+    savePrefs,
+    updateBudget,
+    preferencesLoading,
+    preferencesError,
   } = useStore();
 
   const router = useRouter();
 
-  // ===== STATE =====
-  const [budget, setBudget] = useState<number>(preferences.budget);
-  const [mode, setMode] = useState<Mode>(preferences.mode);
-  const [planTypeState, setPlanTypeState] =
-    useState<PlanType>("monthly");
-
-  const [selected, setSelected] = useState<string[]>([]);
+  // ===== LOCAL STATE (synced with API on mount) =====
+  // Fallback defaults guard against old persisted state that may lack new fields
+  const [budget, setBudget] = useState<number>(preferences.budget ?? 2000);
+  const [mode, setMode] = useState<Mode>(preferences.mode ?? "balanced");
+  const [planTypeState, setPlanTypeState] = useState<PlanType>(preferences.planType ?? "monthly");
+  const [selected, setSelected] = useState<string[]>(preferences.selectedMembers ?? []);
   const [mounted, setMounted] = useState(false);
 
-  // ===== EFFECTS (ALL HOOKS FIRST) =====
+  // ===== EFFECTS =====
   useEffect(() => {
     setMounted(true);
+    loadPrefs();
   }, []);
 
+  /* Sync local state when backend prefs finish loading */
   useEffect(() => {
-    const defaultSelected = family.map((m) => m.id);
-    setSelected(defaultSelected);
-  }, [family]);
+    setBudget(preferences.budget ?? 2000);
+    setMode(preferences.mode ?? "balanced");
+    setPlanTypeState(preferences.planType ?? "monthly");
+    setSelected(preferences.selectedMembers ?? []);
+  }, [preferences]);
 
-  // ===== HANDLERS =====
-  const toggleMember = (id: string) => {
-    setSelected((prev) =>
-      prev.includes(id)
-        ? prev.filter((i) => i !== id)
-        : [...prev, id]
-    );
-  };
-
-  const handleGenerate = () => {
-    setPreferences({ budget, mode });
-    setSelectedMembers(selected);
-    setPlanType(planTypeState);
-
-    router.push("/cart");
-  };
-
-  // ✅ IMPORTANT: AFTER all hooks
+  /* ✅ IMPORTANT: AFTER all hooks */
   if (!mounted) {
     return (
       <MobileContainer>
-        <div className="p-5 text-center text-gray-400">
-          Loading...
-        </div>
+        <div className="p-5 text-center text-gray-400">Loading...</div>
       </MobileContainer>
     );
   }
 
+  // ===== HANDLERS =====
+  const toggleMember = (id: string) => {
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
+
+  const handleBudgetChange = (value: number) => {
+    setBudget(value);
+    updateBudget(value);
+  };
+
+  const handleGenerate = async () => {
+    setPreferences({ budget, mode, planType: planTypeState, selectedMembers: selected });
+    await savePrefs();
+    router.push("/cart");
+  };
+
   return (
     <MobileContainer>
       <div className="p-5 pb-24 space-y-6">
-
         {/* HEADER */}
         <div>
-          <h2 className="text-xl font-semibold">
-            Preferences ⚙️
-          </h2>
-          <p className="text-sm text-gray-500">
-            Customize your smart cart
-          </p>
+          <h2 className="text-xl font-semibold">Preferences ⚙️</h2>
+          <p className="text-sm text-gray-500">Customize your smart cart</p>
         </div>
+
+        {/* Loading / Error */}
+        {preferencesLoading && (
+          <p className="text-xs text-indigo-500">Syncing preferences...</p>
+        )}
+        {preferencesError && (
+          <p className="text-xs text-red-500">{preferencesError}</p>
+        )}
 
         {/* BUDGET */}
         <div>
-          <label className="text-sm text-gray-500">
-            Budget: ₹{budget}
-          </label>
+          <label className="text-sm text-gray-500">Budget: ₹{budget}</label>
 
           <input
             type="range"
@@ -89,7 +95,7 @@ export default function PreferencesPage() {
             max="10000"
             step="100"
             value={budget}
-            onChange={(e) => setBudget(Number(e.target.value))}
+            onChange={(e) => handleBudgetChange(Number(e.target.value))}
             className="w-full mt-2"
           />
         </div>
@@ -104,9 +110,7 @@ export default function PreferencesPage() {
                 key={m}
                 onClick={() => setMode(m)}
                 className={`flex-1 p-3 rounded-xl border ${
-                  mode === m
-                    ? "bg-primary text-white"
-                    : "border-border"
+                  mode === m ? "bg-primary text-white" : "border-border"
                 }`}
               >
                 {m}
@@ -125,9 +129,7 @@ export default function PreferencesPage() {
                 key={p}
                 onClick={() => setPlanTypeState(p)}
                 className={`flex-1 p-3 rounded-xl border ${
-                  planTypeState === p
-                    ? "bg-primary text-white"
-                    : "border-border"
+                  planTypeState === p ? "bg-primary text-white" : "border-border"
                 }`}
               >
                 {p}
@@ -138,9 +140,7 @@ export default function PreferencesPage() {
 
         {/* MEMBER SELECTION */}
         <div>
-          <p className="text-sm text-gray-500 mb-2">
-            Select Members
-          </p>
+          <p className="text-sm text-gray-500 mb-2">Select Members</p>
 
           <div className="space-y-2">
             {family.map((m) => (
@@ -154,12 +154,8 @@ export default function PreferencesPage() {
                 }`}
               >
                 <div>
-                  <p className="capitalize">
-                    {m.gender}
-                  </p>
-                  <p className="text-xs opacity-70">
-                    {m.age} yrs
-                  </p>
+                  <p className="capitalize">{m.gender}</p>
+                  <p className="text-xs opacity-70">{m.age} yrs</p>
                 </div>
 
                 <input
@@ -175,16 +171,15 @@ export default function PreferencesPage() {
         {/* CTA */}
         <button
           onClick={handleGenerate}
-          disabled={selected.length === 0}
+          disabled={selected.length === 0 || preferencesLoading}
           className={`w-full p-4 rounded-2xl text-white font-medium transition ${
-            selected.length === 0
+            selected.length === 0 || preferencesLoading
               ? "bg-gray-300"
               : "bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md active:scale-95"
           }`}
         >
-          Generate Smart Cart 🧠
+          {preferencesLoading ? "Saving..." : "Generate Smart Cart 🧠"}
         </button>
-
       </div>
     </MobileContainer>
   );

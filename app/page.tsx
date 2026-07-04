@@ -13,13 +13,25 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
+import { getAccessToken } from "@/lib/api/client";
 import { useEffect, useState } from "react";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user } = useStore();
+  const { user, logout } = useStore();
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+
+  /* On mount: check if token cookie actually exists.
+   * If cookies were cleared (e.g. manually) but persist still
+   * has isLoggedIn=true, force logout + redirect. */
+  useEffect(() => {
+    setMounted(true);
+    const token = getAccessToken();
+    if (!token && user.isLoggedIn) {
+      logout();
+      router.replace("/login");
+    }
+  }, []);
 
   /* Auth guard — redirect to login if not authenticated */
   if (!mounted) return null;
@@ -86,7 +98,7 @@ export default function HomePage() {
             { icon: "🥦", label: "Healthy" },
             { icon: "💰", label: "Budget" },
             { icon: "⚡", label: "Quick Buy" },
-            { icon: "👤", label: "Profile" },
+            { icon: "👤", label: "Profile", path: "/profile" },
           ].map((item, i) => (
             <div
               key={i}
@@ -173,9 +185,8 @@ export default function HomePage() {
           {/* Orders */}
         </div>
 
-        <div className="flex flex-col items-center text-gray-400 text-3xl">
+        <div onClick={() => router.push("/profile")} className="flex flex-col items-center text-gray-400 text-3xl cursor-pointer">
           👤
-          {/* Profile */}
         </div>
 
       </div>

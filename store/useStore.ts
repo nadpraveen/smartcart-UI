@@ -11,6 +11,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { familyApi } from "@/lib/api/family";
+import { preferencesApi } from "@/lib/api/preferences";
 import { setTokens, clearTokens } from "@/lib/api/client";
 
 // ===== TYPES =====
@@ -31,6 +32,8 @@ export type FamilyMember = {
 export type Preferences = {
   budget: number;
   mode: Mode;
+  planType: PlanType;
+  selectedMembers: string[];
 };
 
 export type CartItem = {
@@ -57,9 +60,8 @@ type Store = {
   familyLoading: boolean;
   familyError: string | null;
   preferences: Preferences;
-
-  selectedMembers: string[];
-  planType: PlanType;
+  preferencesLoading: boolean;
+  preferencesError: string | null;
 
   cartState: CartItem[];
   cartTotal: number;
@@ -79,9 +81,10 @@ type Store = {
   updateMember: (member: FamilyMember) => Promise<void>;
   deleteMember: (id: string) => Promise<void>;
 
-  setPreferences: (p: Preferences) => void;
-  setSelectedMembers: (ids: string[]) => void;
-  setPlanType: (type: PlanType) => void;
+  setPreferences: (p: Partial<Preferences>) => void;
+  loadPrefs: () => Promise<void>;
+  savePrefs: () => Promise<void>;
+  updateBudget: (budget: number) => Promise<void>;
 
   setCartState: (cart: CartItem[]) => void;
 };
@@ -113,10 +116,11 @@ export const useStore = create<Store>()(
       preferences: {
         budget: 2000,
         mode: "balanced",
+        planType: "monthly",
+        selectedMembers: [],
       },
-
-      selectedMembers: [],
-      planType: "monthly",
+      preferencesLoading: false,
+      preferencesError: null,
 
       cartState: [],
       cartTotal: 0,
@@ -216,10 +220,80 @@ export const useStore = create<Store>()(
         }
       },
 
-      // ===== PREFERENCES =====
-      setPreferences: (p) => set(() => ({ preferences: p })),
-      setSelectedMembers: (ids) => set(() => ({ selectedMembers: ids })),
-      setPlanType: (type) => set(() => ({ planType: type })),
+      // ===== PREFERENCES (API-backed) =====
+
+      /* Local-only update for instant UI responsiveness.
+       * Call savePrefs() to persist to backend. */
+      setPreferences: (p) =>
+        set((state) => ({ preferences: { ...state.preferences, ...p } })),
+
+      /* GET — load prefs from API on page mount.
+       * Merges into local state so UI stays responsive. */
+      loadPrefs: async () => {
+        set(() => ({ preferencesLoading: true, preferencesError: null }));
+        try {
+          const data = await preferencesApi.get();
+          set(() => ({
+            preferences: {
+              budget: data.budget ?? 2000,
+              mode: data.mode ?? "balanced",
+              planType: data.planType ?? "monthly",
+              selectedMembers: data.selectedMembers ?? [],
+            },
+            preferencesLoading: false,
+          }));
+        } catch (err: any) {
+          set(() => ({
+            preferencesError: err.message || "Failed to load preferences",
+            preferencesLoading: false,
+          }));
+        }
+      },
+
+      /* POST — full save when user clicks "Generate Smart Cart".
+       * Sends current local state → recalculates plan. */
+      savePrefs: async () => {
+        const { preferences } = get();
+        set(() => ({ preferencesLoading: true, preferencesError: null }));
+        try {
+          const data = await preferencesApi.save(preferences);
+          set(() => ({
+            preferences: {
+              budget: data.budget,
+              mode: data.mode,
+              planType: data.planType,
+              selectedMembers: data.selectedMembers ?? [],
+            },
+            preferencesLoading: false,
+          }));
+        } catch (err: any) {
+          set(() => ({
+            preferencesError: err.message || "Failed to save preferences",
+            preferencesLoading: false,
+          }));
+        }
+      },
+
+      /* PUT — quick budget auto-save from slider.
+       * Optimistic: updates local first, then confirms with API. */
+      updateBudget: async (budget) => {
+        get().setPreferences({ budget });
+        try {
+          const data = await preferencesApi.updateBudget(budget);
+          set(() => ({
+            preferences: {
+              budget: data.budget,
+              mode: data.mode,
+              planType: data.planType,
+              selectedMembers: data.selectedMembers ?? [],
+            },
+          }));
+        } catch {
+          /* Revert on failure — assume backend returns latest known value.
+           * In practice, this should never fail since upsert handles missing docs. */
+          get().loadPrefs();
+        }
+      },
 
       // ===== CART =====
       setCartState: (cart) =>
@@ -235,8 +309,6 @@ export const useStore = create<Store>()(
       partialize: (state) => ({
         user: state.user,
         preferences: state.preferences,
-        selectedMembers: state.selectedMembers,
-        planType: state.planType,
         cartState: state.cartState,
         cartTotal: state.cartTotal,
       }),
