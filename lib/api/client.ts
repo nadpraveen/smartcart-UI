@@ -92,11 +92,14 @@ async function request(method: string, path: string, body?: unknown): Promise<an
   // Parse response
   const json = await res.json();
 
-  if (!json.success) {
+  if (!res.ok || !json.success) {
+    const errorDetails =
+      json.error && typeof json.error === "object" ? json.error : null;
+
     throw new ApiError(
       res.status,
-      json.error?.type || "UNKNOWN",
-      json.error?.message || "Something went wrong",
+      errorDetails?.type || "UNKNOWN",
+      errorDetails?.message || json.message || "Something went wrong",
     );
   }
 
