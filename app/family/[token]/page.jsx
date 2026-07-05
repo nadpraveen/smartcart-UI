@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import SessionRedirect from "@/components/ui/sessionRedirect";
 
 export default function FamilyTokenPage() {
-  const { token } = useParams();
+  const { sessionToken } = useParams();
   const router = useRouter();
   const setUserAfterAuth = useStore((state) => state.setUserAfterAuth);
   const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ export default function FamilyTokenPage() {
 
     const generateAccessToken = async () => {
       try {
-        const data = await authApi.generateSecureToken({ token });
+        const data = await authApi.generateSecureToken({ sessionToken });
 
         if (cancelled) return;
 
