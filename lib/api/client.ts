@@ -11,7 +11,7 @@
  * The backend authGuard stays unchanged.
  */
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://smart-cart-backend-b039.onrender.com/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://smart-cart-backend-b039.onrender.com";
 const TOKEN_COOKIE = "sc_token";
 const REFRESH_COOKIE = "sc_refresh";
 
