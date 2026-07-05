@@ -14,7 +14,7 @@ export default function FamilyTokenPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (typeof token !== "string") return;
+    if (typeof sessionToken !== "string") return;
 
     let cancelled = false;
 
