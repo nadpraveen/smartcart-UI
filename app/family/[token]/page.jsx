@@ -42,7 +42,7 @@ export default function FamilyTokenPage() {
     return () => {
       cancelled = true;
     };
-  }, [token, router, setUserAfterAuth]);
+  }, [sessionToken, router, setUserAfterAuth]);
 
   return <SessionRedirect error={error} />;
 }
