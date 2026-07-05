@@ -12,4 +12,7 @@ export const authApi = {
   /* Login existing user → { user, accessToken, refreshToken } */
   login: (data: { phone: string; otp: string }) =>
     apiClient.post("/api/v1/auth/login", data),
+
+  generateSecureToken: (data: { token: string }) =>
+    apiClient.post('/genSecureWhatsappToken', data),
 };
