@@ -23,8 +23,12 @@ export default function PreferencesPage() {
   // Fallback defaults guard against old persisted state that may lack new fields
   const [budget, setBudget] = useState<number>(preferences.budget ?? 2000);
   const [mode, setMode] = useState<Mode>(preferences.mode ?? "balanced");
-  const [planTypeState, setPlanTypeState] = useState<PlanType>(preferences.planType ?? "monthly");
-  const [selected, setSelected] = useState<string[]>(preferences.selectedMembers ?? []);
+  const [planTypeState, setPlanTypeState] = useState<PlanType>(
+    preferences.planType ?? "monthly",
+  );
+  const [selected, setSelected] = useState<string[]>(
+    preferences.selectedMembers ?? [],
+  );
   const [mounted, setMounted] = useState(false);
 
   // ===== EFFECTS =====
@@ -63,9 +67,14 @@ export default function PreferencesPage() {
   };
 
   const handleGenerate = async () => {
-    setPreferences({ budget, mode, planType: planTypeState, selectedMembers: selected });
+    setPreferences({
+      budget,
+      mode,
+      planType: planTypeState,
+      selectedMembers: selected,
+    });
     await savePrefs();
-    router.push("/cart");
+    // router.push("/cart");
   };
 
   return (
@@ -129,7 +138,9 @@ export default function PreferencesPage() {
                 key={p}
                 onClick={() => setPlanTypeState(p)}
                 className={`flex-1 p-3 rounded-xl border ${
-                  planTypeState === p ? "bg-primary text-white" : "border-border"
+                  planTypeState === p
+                    ? "bg-primary text-white"
+                    : "border-border"
                 }`}
               >
                 {p}
@@ -169,7 +180,15 @@ export default function PreferencesPage() {
         </div>
 
         {/* CTA */}
+
         <button
+          onClick={handleGenerate}
+          className="w-full p-4 rounded-2xl text-white font-medium transition bg-gradient-to-r from-indigo-500 to-purple-500 shadow-md active:scale-95"
+        >
+          {preferencesLoading ? "Saving..." : "Save"}
+        </button>
+
+        {/* <button
           onClick={handleGenerate}
           disabled={selected.length === 0 || preferencesLoading}
           className={`w-full p-4 rounded-2xl text-white font-medium transition ${
@@ -179,7 +198,7 @@ export default function PreferencesPage() {
           }`}
         >
           {preferencesLoading ? "Saving..." : "Generate Smart Cart 🧠"}
-        </button>
+        </button> */}
       </div>
     </MobileContainer>
   );

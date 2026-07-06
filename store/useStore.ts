@@ -278,21 +278,21 @@ export const useStore = create<Store>()(
        * Optimistic: updates local first, then confirms with API. */
       updateBudget: async (budget) => {
         get().setPreferences({ budget });
-        try {
-          const data = await preferencesApi.updateBudget(budget);
-          set(() => ({
-            preferences: {
-              budget: data.budget,
-              mode: data.mode,
-              planType: data.planType,
-              selectedMembers: data.selectedMembers ?? [],
-            },
-          }));
-        } catch {
-          /* Revert on failure — assume backend returns latest known value.
-           * In practice, this should never fail since upsert handles missing docs. */
-          get().loadPrefs();
-        }
+        // try {
+        //   const data = await preferencesApi.updateBudget(budget);
+        //   set(() => ({
+        //     preferences: {
+        //       budget: data.budget,
+        //       mode: data.mode,
+        //       planType: data.planType,
+        //       selectedMembers: data.selectedMembers ?? [],
+        //     },
+        //   }));
+        // } catch {
+        //   /* Revert on failure — assume backend returns latest known value.
+        //    * In practice, this should never fail since upsert handles missing docs. */
+        //   get().loadPrefs();
+        // }
       },
 
       // ===== CART =====

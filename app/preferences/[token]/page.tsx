@@ -1,0 +1,49 @@
+"use client";
+
+import { authApi } from "@/lib/api/auth";
+import { ApiError } from "@/lib/api/client";
+import { useStore } from "@/store/useStore";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import SessionRedirect from "@/components/ui/sessionRedirect";
+
+export default function FamilyTokenPage() {
+  const { token } = useParams();
+  const router = useRouter();
+  const setUserAfterAuth = useStore((state) => state.setUserAfterAuth);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof token !== "string") return;
+
+    let cancelled = false;
+
+    const generateAccessToken = async () => {
+      try {
+        const data = await authApi.generateSecureToken({ sessionToken: token });
+
+        if (cancelled) return;
+        console.log(data?.response);
+
+        setUserAfterAuth(data?.response);
+        router.replace("/preferences"); 
+      } catch (err) {
+        if (cancelled) return;
+
+        setError(
+          err instanceof ApiError
+            ? err.message
+            : "Unable to verify this family link. Please try again.",
+        );
+      }
+    };
+
+    generateAccessToken();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, router, setUserAfterAuth]);
+
+  return <SessionRedirect error={error} />;
+}
