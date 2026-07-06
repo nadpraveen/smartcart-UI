@@ -23,8 +23,6 @@ export default function FamilyTokenPage() {
         const data = await authApi.generateSecureToken({ sessionToken: token });
 
         if (cancelled) return;
-        console.log(data?.response);
-
         setUserAfterAuth(data?.response);
         router.replace("/preferences"); 
       } catch (err) {
