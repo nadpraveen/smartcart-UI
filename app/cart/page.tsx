@@ -25,11 +25,11 @@ export default function CartPage() {
     const fetchCart = async () => {
       const res = await generateCart();
 
-      setCart(res.data[0].cart || []);
-      setInsights(res.data[0].insights || []);
-      setTotal(res.data[0].total || 0);
+      setCart(res[0].cart || []);
+      setInsights(res[0].insights || []);
+      setTotal(res[0].total || 0);
       setLoading(false);
-      setCartState(res.data[0].cart);
+      setCartState(res[0].cart);
     };
 
     fetchCart();
@@ -55,9 +55,9 @@ export default function CartPage() {
       prev.map((i) =>
         i.id === item.id
           ? {
-            ...i,
-            quantity: Math.max(1, (i.quantity || 1) + delta),
-          }
+              ...i,
+              quantity: Math.max(1, (i.quantity || 1) + delta),
+            }
           : i,
       ),
     );
@@ -70,7 +70,7 @@ export default function CartPage() {
       return sum + item.price * (item.quantity || 1);
     }, 0);
     setTotal(newTotal);
-    setCartState(cart.filter(item => !item.dontSuggest));
+    setCartState(cart.filter((item) => !item.dontSuggest));
   }, [cart, setCartState]);
 
   const handleSelectBrand = (item: any, selectedAlternative: any) => {
@@ -84,7 +84,9 @@ export default function CartPage() {
           };
           const newAlternatives = [
             oldBrand,
-            ...(i.alternatives || []).filter((alt: any) => alt.name !== selectedAlternative.name)
+            ...(i.alternatives || []).filter(
+              (alt: any) => alt.name !== selectedAlternative.name,
+            ),
           ];
           return {
             ...i,
@@ -95,15 +97,15 @@ export default function CartPage() {
           };
         }
         return i;
-      })
+      }),
     );
   };
 
   const handleToggleDontSuggest = (item: any) => {
     setCart((prev) =>
       prev.map((i) =>
-        i.id === item.id ? { ...i, dontSuggest: !i.dontSuggest } : i
-      )
+        i.id === item.id ? { ...i, dontSuggest: !i.dontSuggest } : i,
+      ),
     );
   };
 
@@ -268,12 +270,22 @@ export default function CartPage() {
             <span className="font-semibold text-lg">₹{total}</span>
           </div>
 
-          <button
+          {/* <button
             onClick={() => router.push("/slot")}
             className="w-full bg-primary text-white p-3 rounded-xl 
                font-medium active:scale-95 transition"
           >
             Proceed to Checkout →
+          </button> */}
+
+          <button
+            onClick={() =>
+              (window.location.href = "https://wa.me/917893984343")
+            }
+            className="w-full bg-primary text-white p-3 rounded-xl 
+               font-medium active:scale-95 transition"
+          >
+            Done →
           </button>
         </div>
       )}
