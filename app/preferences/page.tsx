@@ -74,7 +74,11 @@ export default function PreferencesPage() {
       selectedMembers: selected,
     });
     await savePrefs();
-    // router.push("/cart");
+
+    // Redirect to WhatsApp on success
+    if (!useStore.getState().preferencesError) {
+      window.location.href = "https://wa.me/917893984343";
+    }
   };
 
   return (

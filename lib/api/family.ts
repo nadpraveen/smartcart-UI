@@ -28,4 +28,8 @@ export const familyApi = {
   /* DELETE — remove a member, returns updated array */
   deleteMember: (memberId: string) =>
     apiClient.delete("/api/v1/families", { memberId }),
+
+  /* PUT /batch — save ALL members in one atomic call */
+  saveMembers: (members: any[]) =>
+    apiClient.put("/api/v1/families/batch", { members }),
 };

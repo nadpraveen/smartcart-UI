@@ -2,11 +2,18 @@
 
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AddMemberModal from "@/components/modals/AddMemberModal";
 
 export default function FamilyPage() {
-  const { family, familyLoading, familyError, loadFamily, deleteMember } = useStore();
+  const {
+    family,
+    familyLoading,
+    familyError,
+    loadFamily,
+    deleteMemberLocal,
+    saveFamilyMembers,
+  } = useStore();
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
@@ -18,6 +25,15 @@ export default function FamilyPage() {
   useEffect(() => {
     if (mounted) loadFamily();
   }, [mounted]);
+
+  /* Handle "Done" — save all members then redirect to WhatsApp */
+  const handleDone = useCallback(async () => {
+    await saveFamilyMembers();
+    // If no error was set during save, redirect to WhatsApp
+    if (!useStore.getState().familyError) {
+      window.location.href = "https://wa.me/917893984343";
+    }
+  }, [saveFamilyMembers]);
 
   if (!mounted) return null;
 
@@ -105,7 +121,7 @@ export default function FamilyPage() {
                 </button>
 
                 <button
-                  onClick={() => deleteMember(m.id)}
+                  onClick={() => deleteMemberLocal(m.id)}
                   className="text-red-500 disabled:opacity-50"
                   disabled={familyLoading}
                 >
@@ -125,17 +141,37 @@ export default function FamilyPage() {
           </div>
         )}
 
-        {/* Floating Add */}
-        <button
-          onClick={() => setOpen(true)}
-          disabled={familyLoading}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 
-                     max-w-[360px] w-[90%]
-                     bg-primary text-white p-4 rounded-2xl 
-                     font-medium shadow-lg active:scale-95 transition disabled:opacity-50"
-        >
-          + Add Member
-        </button>
+        {/* Bottom Action Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex gap-3 max-w-md mx-auto shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+          <button
+            onClick={() => {
+              setSelected(null);
+              setOpen(true);
+            }}
+            disabled={familyLoading}
+            className="flex-1 bg-gray-100 text-gray-700 p-4 rounded-2xl font-medium active:scale-95 transition disabled:opacity-50"
+          >
+            + Add Member
+          </button>
+
+          <button
+            onClick={handleDone}
+            disabled={familyLoading || family.length === 0}
+            className="flex-1 bg-primary text-white p-4 rounded-2xl font-medium shadow-lg active:scale-95 transition disabled:opacity-50"
+          >
+            {familyLoading ? "Saving..." : "Done ✓"}
+          </button>
+        </div>
+
+        {/* Saving overlay */}
+        {familyLoading && (
+          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-40">
+            <div className="bg-white p-6 rounded-2xl shadow-xl flex items-center gap-3">
+              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
+              <span className="text-sm font-medium">Saving family members...</span>
+            </div>
+          </div>
+        )}
 
         {/* Modal */}
         {open && (
@@ -147,6 +183,7 @@ export default function FamilyPage() {
             }}
           />
         )}
+
       </div>
     </MobileContainer>
   );

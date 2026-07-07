@@ -23,10 +23,7 @@ export default function CartPage() {
   // ✅ FETCH CART FROM BACKEND
   useEffect(() => {
     const fetchCart = async () => {
-      const res = await generateCart({
-        budget: preferences.budget,
-        family,
-      });
+      const res = await generateCart();
 
       setCart(res.cart || []);
       setInsights(res.insights || []);
@@ -58,9 +55,9 @@ export default function CartPage() {
       prev.map((i) =>
         i.id === item.id
           ? {
-              ...i,
-              quantity: Math.max(1, (i.quantity || 1) + delta),
-            }
+            ...i,
+            quantity: Math.max(1, (i.quantity || 1) + delta),
+          }
           : i,
       ),
     );
@@ -113,11 +110,7 @@ export default function CartPage() {
   const handleRegenerate = async (mode: any) => {
     setLoading(true);
 
-    const res = await generateCart({
-      budget: preferences.budget,
-      family,
-      mode, // 🔥 dynamic
-    });
+    const res = await generateCart();
 
     setCart(res.cart || []);
     setInsights(res.insights || []);

@@ -10,7 +10,7 @@ export default function AddMemberModal({
   onClose: () => void;
   existing?: any;
 }) {
-  const { addMember, updateMember } = useStore();
+  const { addMemberLocal, updateMemberLocal } = useStore();
 
   const [name, setName] = useState(existing?.name || "");
   const [age, setAge] = useState(existing?.age || 25);
@@ -27,7 +27,7 @@ export default function AddMemberModal({
   const handleAdd = () => {
     console.log('allergies', allergies); 
     if (existing) {
-      updateMember({
+      updateMemberLocal({
         ...existing,
         name,
         age,
@@ -38,7 +38,7 @@ export default function AddMemberModal({
         additionalInfo,
       });
     } else {
-      addMember({
+      addMemberLocal({
         name,
         age,
         gender,

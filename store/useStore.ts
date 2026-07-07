@@ -75,11 +75,12 @@ type Store = {
   }) => void;
   logout: () => void;
 
-  /* Family actions — API-backed */
+  /* Family actions — local-only until saveFamilyMembers() */
   loadFamily: () => Promise<void>;
-  addMember: (member: Omit<FamilyMember, "id">) => Promise<void>;
-  updateMember: (member: FamilyMember) => Promise<void>;
-  deleteMember: (id: string) => Promise<void>;
+  addMemberLocal: (member: Omit<FamilyMember, "id">) => void;
+  updateMemberLocal: (member: FamilyMember) => void;
+  deleteMemberLocal: (id: string) => void;
+  saveFamilyMembers: () => Promise<void>;
 
   setPreferences: (p: Partial<Preferences>) => void;
   loadPrefs: () => Promise<void>;
@@ -186,37 +187,71 @@ export const useStore = create<Store>()(
         }
       },
 
-      /* Add member → API returns full updated array → replace local */
-      addMember: async (member) => {
-        set(() => ({ familyLoading: true, familyError: null }));
-        try {
-          const members = await familyApi.addMember(member);
-          set(() => ({ family: mapMembers(members), familyLoading: false }));
-        } catch (err: any) {
-          set(() => ({ familyError: err.message || "Failed to add member", familyLoading: false }));
-        }
-      },
+      /* ===== LOCAL-ONLY MUTATIONS =====
+       * These ONLY update the in-memory Zustand array.
+       * No API calls happen until saveFamilyMembers() is invoked.
+       */
 
-      /* Update member → API returns full updated array → replace local */
-      updateMember: async (member) => {
-        set(() => ({ familyLoading: true, familyError: null }));
-        try {
-          const { id, ...updates } = member;
-          const members = await familyApi.updateMember(id, updates);
-          set(() => ({ family: mapMembers(members), familyLoading: false }));
-        } catch (err: any) {
-          set(() => ({ familyError: err.message || "Failed to update member", familyLoading: false }));
-        }
-      },
+      /* Add member — local state only, generates UUID for temp id */
+      addMemberLocal: (member) =>
+        set((state) => ({
+          family: [...state.family, { ...member, id: crypto.randomUUID() }],
+        })),
 
-      /* Delete member → API returns full updated array → replace local */
-      deleteMember: async (id) => {
+      /* Update member — local state only */
+      updateMemberLocal: (member) =>
+        set((state) => ({
+          family: state.family.map((m) => (m.id === member.id ? member : m)),
+        })),
+
+      /* Delete member — local state only */
+      deleteMemberLocal: (id) =>
+        set((state) => ({
+          family: state.family.filter((m) => m.id !== id),
+        })),
+
+      /* ===== BATCH SAVE =====
+       * Sends ALL current local members to the backend in one atomic call.
+       * Existing members (with MongoDB ObjectId as `id`) carry their `_id`
+       * so the server preserves them. New members (UUID ids) are sent
+       * without `_id` so Mongoose auto-generates ObjectIds.
+       * On success, local state is replaced with the server response.
+       */
+      saveFamilyMembers: async () => {
         set(() => ({ familyLoading: true, familyError: null }));
         try {
-          const members = await familyApi.deleteMember(id);
-          set(() => ({ family: mapMembers(members), familyLoading: false }));
+          const { family } = get();
+
+          // Map `id` → `_id` for members that originally came from MongoDB
+          const membersToSave = family.map((m) => {
+            const isMongoId = /^[0-9a-f]{24}$/i.test(m.id);
+            return {
+              name: m.name,
+              age: m.age,
+              gender: m.gender,
+              diet: m.diet,
+              allergies: m.allergies,
+              isGuest: m.isGuest,
+              additionalInfo: m.additionalInfo,
+              ...(isMongoId ? { _id: m.id } : {}),
+            };
+          });
+
+          const saved = await familyApi.saveMembers(membersToSave);
+
+          // Replace local state using server response (contains real _ids)
+          set(() => ({
+            family: saved.map((m: any) => ({
+              ...m,
+              id: m._id || m.id,
+            })),
+            familyLoading: false,
+          }));
         } catch (err: any) {
-          set(() => ({ familyError: err.message || "Failed to delete member", familyLoading: false }));
+          set(() => ({
+            familyError: err.message || "Failed to save family members",
+            familyLoading: false,
+          }));
         }
       },
 
