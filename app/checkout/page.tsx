@@ -43,17 +43,9 @@ export default function CheckoutPage() {
 
   const displayTotal = activeCart?.total ?? cartTotal;
 
-  /* Confirm the order and redirect to WhatsApp */
-  const handleConfirmOrder = async () => {
-    setLoading(true);
-    try {
-      await authGet("/api/v1/orders/confirm-order");
-      window.location.href = "https://wa.me/917893984343";
-    } catch {
-      // Error will be displayed via the existing error UI
-    } finally {
-      setLoading(false);
-    }
+  /* Proceed to processing — order confirmation happens there */
+  const handlePay = () => {
+    router.push("/processing");
   };
 
   return (
@@ -131,12 +123,12 @@ export default function CheckoutPage() {
 
         {/* CONFIRM BUTTON */}
         <button
-          onClick={handleConfirmOrder}
+          onClick={handlePay}
           disabled={loading || displayTotal === 0}
           className="w-full bg-primary text-white p-4 rounded-2xl 
                      font-medium shadow active:scale-95 transition disabled:opacity-50"
         >
-          {loading ? "Processing..." : "Confirm Order →"}
+          Confirm Order →
         </button>
       </div>
     </MobileContainer>
