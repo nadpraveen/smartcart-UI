@@ -25,11 +25,11 @@ export default function CartPage() {
     const fetchCart = async () => {
       const res = await generateCart();
 
-      setCart(res.cart || []);
-      setInsights(res.insights || []);
-      setTotal(res.total || 0);
+      setCart(res.data[0].cart || []);
+      setInsights(res.data[0].insights || []);
+      setTotal(res.data[0].total || 0);
       setLoading(false);
-      setCartState(res.cart);
+      setCartState(res.data[0].cart);
     };
 
     fetchCart();
