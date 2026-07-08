@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
-import { getAccessToken } from "@/lib/api/client";
-
-const BASE = "https://smart-cart-backend-b039.onrender.com";
+import { apiClient } from "@/lib/api/client";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -15,21 +13,11 @@ export default function CheckoutPage() {
   const [activeCart, setActiveCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  /* Helper: direct fetch with Bearer token */
-  const authGet = async (path: string) => {
-    const res = await fetch(`${BASE}${path}`, {
-      headers: { Authorization: `Bearer ${getAccessToken()}` },
-    });
-    const json = await res.json();
-    if (!res.ok || !json.success) throw new Error(json.message || "Request failed");
-    return json.data;
-  };
-
   /* Fetch the user's cart from the backend on mount */
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const cart = await authGet("/api/v1/carts/");
+        const cart = await apiClient.get("/api/v1/carts/");
         setActiveCart(cart);
       } catch {
         setActiveCart(null);
@@ -43,9 +31,17 @@ export default function CheckoutPage() {
 
   const displayTotal = activeCart?.total ?? cartTotal;
 
-  /* Proceed to processing — order confirmation happens there */
-  const handlePay = () => {
-    router.push("/processing");
+  /* Confirm the order and redirect to WhatsApp */
+  const handleConfirmOrder = async () => {
+    setLoading(true);
+    try {
+      await apiClient.get("/api/v1/orders/confirm-order");
+      window.location.href = "https://wa.me/917893984343";
+    } catch {
+      // Error will be displayed via the existing error UI
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,12 +119,12 @@ export default function CheckoutPage() {
 
         {/* CONFIRM BUTTON */}
         <button
-          onClick={handlePay}
+          onClick={handleConfirmOrder}
           disabled={loading || displayTotal === 0}
           className="w-full bg-primary text-white p-4 rounded-2xl 
                      font-medium shadow active:scale-95 transition disabled:opacity-50"
         >
-          Confirm Order →
+          {loading ? "Processing..." : "Confirm Order →"}
         </button>
       </div>
     </MobileContainer>
