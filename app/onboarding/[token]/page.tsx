@@ -7,11 +7,11 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import SessionRedirect from "@/components/ui/sessionRedirect";
 
-export default function FamilyTokenPage() {
+export default function OnboardingTokenPage() {
   const { token } = useParams();
   const router = useRouter();
   const setUserAfterAuth = useStore((state) => state.setUserAfterAuth);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof token !== "string") return;
@@ -23,17 +23,15 @@ export default function FamilyTokenPage() {
         const data = await authApi.generateSecureToken({ sessionToken: token });
 
         if (cancelled) return;
-        console.log(data?.response);
-
         setUserAfterAuth(data?.response);
-        router.replace("/family");
+        router.replace("/onboarding");
       } catch (err) {
         if (cancelled) return;
 
         setError(
           err instanceof ApiError
             ? err.message
-            : "Unable to verify this family link. Please try again.",
+            : "Unable to verify this link. Please try again.",
         );
       }
     };

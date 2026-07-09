@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import SessionRedirect from "@/components/ui/sessionRedirect";
 
-export default function FamilyTokenPage() {
+export default function RatingTokenPage() {
   const { token } = useParams();
   const router = useRouter();
   const setUserAfterAuth = useStore((state) => state.setUserAfterAuth);
@@ -24,7 +24,7 @@ export default function FamilyTokenPage() {
 
         if (cancelled) return;
         setUserAfterAuth(data?.response);
-        router.replace("/onboarding");
+        router.replace("/rating");
       } catch (err) {
         if (cancelled) return;
 

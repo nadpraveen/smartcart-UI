@@ -90,7 +90,7 @@ export default function HomePage() {
 
           {[
             { icon: "🛒", label: "Smart Grocery", path: "/cart" },
-            { icon: "👥", label: "Family", path: "/family" },
+            { icon: "👥", label: "Family", path: "/onboarding" },
             { icon: "📋", label: "Orders", path: "/orders" },
             { icon: "📦", label: "Parcels" },
             { icon: "🚚", label: "Delivery" },

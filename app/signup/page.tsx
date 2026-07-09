@@ -52,7 +52,7 @@ export default function SignupPage() {
     try {
       const data = await authApi.register({ name, phone, otp: otp.join("") });
       setUserAfterAuth(data);
-      router.push("/");
+      router.push("/onboarding");
     } catch (err) {
       if (err instanceof ApiError) setError(err.message);
       else setError("Something went wrong. Please try again.");

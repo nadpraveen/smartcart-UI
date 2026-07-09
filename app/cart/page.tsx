@@ -12,7 +12,7 @@ import CategoryChart from "@/components/charts/CategoryChart";
 
 export default function CartPage() {
   const router = useRouter();
-  const { family, preferences, setCartState } = useStore();
+  const { preferences, setCartState } = useStore();
 
   const [cart, setCart] = useState<any[]>([]);
   const [insights, setInsights] = useState<string[]>([]);
