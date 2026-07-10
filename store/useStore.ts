@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { apiClient, setTokens, clearTokens } from "@/lib/api/client";
 import { preferencesApi } from "@/lib/api/preferences";
-import { setTokens, clearTokens } from "@/lib/api/client";
 
 export type Mode = "budget" | "balanced" | "premium";
 export type PlanType = "weekly" | "monthly";
@@ -58,6 +58,7 @@ type Store = {
 
   setPreferences: (p: Partial<Preferences>) => void;
   loadPrefs: () => Promise<void>;
+  loadProfile: () => Promise<void>;
   savePrefs: () => Promise<void>;
   updateBudget: (budget: number) => Promise<void>;
 
@@ -134,6 +135,21 @@ export const useStore = create<Store>()(
 
       setPreferences: (p) =>
         set((state) => ({ preferences: { ...state.preferences, ...p } })),
+
+      loadProfile: async () => {
+        try {
+          const data = await apiClient.get("/api/v1/users/profile");
+          set(() => ({
+            user: { ...data },
+            foodPreference: data.foodPreference || "veg",
+            householdAllergies: data.householdAllergies || [],
+            familyMemberCount: data.familyMemberCount || 1,
+            deliveryAddress: data.deliveryAddress || { address: "", landmark: "", pincode: "" },
+          }));
+        } catch {
+          // silently fail, keep defaults
+        }
+      },
 
       loadPrefs: async () => {
         try {

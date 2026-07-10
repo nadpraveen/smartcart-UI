@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
+import { apiClient } from "@/lib/api/client";
 import { generateCart } from "@/lib/api/cart";
 import ProductCard from "@/components/cart/ProductCard";
 import Skeleton from "@/components/ui/Skeleton";
@@ -18,6 +19,7 @@ export default function CartPage() {
   const [insights, setInsights] = useState<string[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // ✅ FETCH CART FROM BACKEND
@@ -279,13 +281,21 @@ export default function CartPage() {
           </button> */}
 
           <button
-            onClick={() =>
-              (window.location.href = "https://wa.me/917893984343")
-            }
+            onClick={async () => {
+              if (saving) return;
+              setSaving(true);
+              try {
+                await apiClient.post("/api/v1/carts/update-cart");
+                window.location.href = "https://wa.me/917893984343";
+              } catch {
+                setSaving(false);
+              }
+            }}
+            disabled={saving}
             className="w-full bg-primary text-white p-3 rounded-xl 
-               font-medium active:scale-95 transition"
+               font-medium active:scale-95 transition disabled:opacity-50"
           >
-            Done →
+            {saving ? "Processing..." : "Done →"}
           </button>
         </div>
       )}
