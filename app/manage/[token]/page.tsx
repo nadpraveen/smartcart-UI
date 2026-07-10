@@ -15,5 +15,5 @@ export default function ManagePageClient() {
     router.replace(`/onboarding/${token}`);
   }, [token, router]);
 
-  return <>hello</>;
+  return null;
 }
