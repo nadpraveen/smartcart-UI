@@ -54,11 +54,11 @@ export default function OnboardingPage() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (mounted && !user.isLoggedIn) {
-      router.replace("/signup");
-    }
-  }, [mounted, user.isLoggedIn, router]);
+  // useEffect(() => {
+  //   if (mounted && !user.isLoggedIn) {
+  //     router.replace("/signup");
+  //   }
+  // }, [mounted, user.isLoggedIn, router]);
 
   useEffect(() => {
     if (!mounted) return;
