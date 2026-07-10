@@ -5,7 +5,7 @@ import { useStore, FoodPreference, Mode, PlanType } from "@/store/useStore";
 import { preferencesApi } from "@/lib/api/preferences";
 import { userApi } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Check } from "lucide-react";
 
 const ALLERGIES = ["lactose", "nuts", "gluten"] as const;
@@ -25,9 +25,12 @@ export default function OnboardingPage() {
     setFamilyMemberCount,
     setDeliveryAddress,
     setPreferences,
+    loadProfile,
+    loadPrefs,
   } = useStore();
 
   const [mounted, setMounted] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -49,7 +52,6 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     setMounted(true);
-    setLocalName(user.name);
   }, []);
 
   useEffect(() => {
@@ -57,6 +59,25 @@ export default function OnboardingPage() {
       router.replace("/signup");
     }
   }, [mounted, user.isLoggedIn, router]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    Promise.all([loadProfile(), loadPrefs()]).finally(() => setDataLoaded(true));
+  }, [mounted]);
+
+  useEffect(() => {
+    if (!dataLoaded) return;
+    setLocalName(user.name);
+    setLocalCount(familyMemberCount);
+    setLocalFoodPref(foodPreference);
+    setLocalAllergies(householdAllergies);
+    setLocalBudget(preferences.budget);
+    setLocalMode(preferences.mode);
+    setLocalPlanType(preferences.planType);
+    setLocalAddress(deliveryAddress.address);
+    setLocalLandmark(deliveryAddress.landmark);
+    setLocalPincode(deliveryAddress.pincode);
+  }, [dataLoaded, user.name, foodPreference, householdAllergies, familyMemberCount, deliveryAddress, preferences]);
 
   const toggleAllergy = (item: string) => {
     setLocalAllergies((prev) =>
