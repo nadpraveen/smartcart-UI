@@ -1,17 +1,19 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export default function ManagePageClient() {
-  const searchParams = useSearchParams();
+  const {token} = useParams();
   const router = useRouter();
-  const token = searchParams?.get("token");
+
+
+  console.log("token", token)
 
   useEffect(() => {
     if (!token) return;
     router.replace(`/onboarding/${token}`);
   }, [token, router]);
 
-  return null;
+  return <>hello</>;
 }
