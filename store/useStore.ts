@@ -72,7 +72,7 @@ export const useStore = create<Store>()(
         id: "",
         name: "",
         phone: "",
-        isLoggedIn: false,
+        isLoggedIn: true,
         accessToken: "",
         refreshToken: "",
       },
@@ -139,8 +139,14 @@ export const useStore = create<Store>()(
       loadProfile: async () => {
         try {
           const data = await apiClient.get("/api/v1/users/profile");
-          set(() => ({
-            user: { ...data },
+          set((state) => ({
+            user: {
+              ...state.user,
+              id: data._id ?? data.id ?? state.user.id,
+              name: data.name ?? state.user.name,
+              phone: data.phone ?? state.user.phone,
+              isLoggedIn: true,
+            },
             foodPreference: data.foodPreference || "veg",
             householdAllergies: data.householdAllergies || [],
             familyMemberCount: data.familyMemberCount || 1,

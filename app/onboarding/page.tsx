@@ -5,11 +5,14 @@ import { useStore, FoodPreference, Mode, PlanType } from "@/store/useStore";
 import { preferencesApi } from "@/lib/api/preferences";
 import { userApi } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { Check } from "lucide-react";
 
 const ALLERGIES = ["lactose", "nuts", "gluten"] as const;
 const FAMILY_COUNT_OPTIONS = [1, 2, 3, 4];
+const emptySubscribe = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -29,7 +32,7 @@ export default function OnboardingPage() {
     loadPrefs,
   } = useStore();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, clientSnapshot, serverSnapshot);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -51,33 +54,36 @@ export default function OnboardingPage() {
   const [localPincode, setLocalPincode] = useState(deliveryAddress.pincode);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // useEffect(() => {
-  //   if (mounted && !user.isLoggedIn) {
-  //     router.replace("/signup");
-  //   }
-  // }, [mounted, user.isLoggedIn, router]);
-
-  useEffect(() => {
     if (!mounted) return;
-    Promise.all([loadProfile(), loadPrefs()]).finally(() => setDataLoaded(true));
-  }, [mounted]);
+    let cancelled = false;
+
+    Promise.all([loadProfile(), loadPrefs()]).finally(() => {
+      if (cancelled) return;
+
+      const state = useStore.getState();
+      setLocalName(state.user.name);
+      setLocalCount(state.familyMemberCount);
+      setLocalFoodPref(state.foodPreference);
+      setLocalAllergies(state.householdAllergies);
+      setLocalBudget(state.preferences.budget);
+      setLocalMode(state.preferences.mode);
+      setLocalPlanType(state.preferences.planType);
+      setLocalAddress(state.deliveryAddress.address);
+      setLocalLandmark(state.deliveryAddress.landmark);
+      setLocalPincode(state.deliveryAddress.pincode);
+      setDataLoaded(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, loadProfile, loadPrefs]);
 
   useEffect(() => {
-    if (!dataLoaded) return;
-    setLocalName(user.name);
-    setLocalCount(familyMemberCount);
-    setLocalFoodPref(foodPreference);
-    setLocalAllergies(householdAllergies);
-    setLocalBudget(preferences.budget);
-    setLocalMode(preferences.mode);
-    setLocalPlanType(preferences.planType);
-    setLocalAddress(deliveryAddress.address);
-    setLocalLandmark(deliveryAddress.landmark);
-    setLocalPincode(deliveryAddress.pincode);
-  }, [dataLoaded, user.name, foodPreference, householdAllergies, familyMemberCount, deliveryAddress, preferences]);
+    if (dataLoaded && !user.isLoggedIn) {
+      router.replace("/signup");
+    }
+  }, [dataLoaded, user.isLoggedIn, router]);
 
   const toggleAllergy = (item: string) => {
     setLocalAllergies((prev) =>
@@ -151,8 +157,8 @@ export default function OnboardingPage() {
         }),
       ]);
       window.location.href = "https://wa.me/917893984343";
-    } catch (err: any) {
-      setSubmitError(err?.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -160,7 +166,7 @@ export default function OnboardingPage() {
 
   if (!mounted) return null;
 
-  if (!user.isLoggedIn) {
+  if (!dataLoaded || !user.isLoggedIn) {
     return (
       <MobileContainer>
         <div className="flex min-h-screen items-center justify-center">
