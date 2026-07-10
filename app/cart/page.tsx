@@ -285,7 +285,7 @@ export default function CartPage() {
               if (saving) return;
               setSaving(true);
               try {
-                await apiClient.post("/api/v1/carts/update-cart");
+                await apiClient.get("/api/v1/carts/update-cart");
                 window.location.href = "https://wa.me/917893984343";
               } catch {
                 setSaving(false);
