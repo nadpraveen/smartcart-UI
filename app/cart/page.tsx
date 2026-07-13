@@ -10,6 +10,7 @@ import ProductCard from "@/components/cart/ProductCard";
 import Skeleton from "@/components/ui/Skeleton";
 import { PieChart, Pie, Tooltip, Cell } from "recharts";
 import CategoryChart from "@/components/charts/CategoryChart";
+import { getChannel } from "@/lib/utils/channel";
 
 export default function CartPage() {
   const router = useRouter();
@@ -25,13 +26,21 @@ export default function CartPage() {
   // ✅ FETCH CART FROM BACKEND
   useEffect(() => {
     const fetchCart = async () => {
-      const res = await generateCart();
+      try {
+        const res = await generateCart();
+        const data = Array.isArray(res) ? res[0] : res;
 
-      setCart(res[0].cart || []);
-      setInsights(res[0].insights || []);
-      setTotal(res[0].total || 0);
-      setLoading(false);
-      setCartState(res[0].cart);
+        setCart(data?.cart || []);
+        setInsights(data?.insights || []);
+        setTotal(data?.total || 0);
+        setCartState(data?.cart || []);
+      } catch {
+        setCart([]);
+        setInsights([]);
+        setTotal(0);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchCart();
@@ -114,12 +123,20 @@ export default function CartPage() {
   const handleRegenerate = async (mode: any) => {
     setLoading(true);
 
-    const res = await generateCart();
+    try {
+      const res = await generateCart();
+      const data = Array.isArray(res) ? res[0] : res;
 
-    setCart(res.cart || []);
-    setInsights(res.insights || []);
-    setTotal(res.total || 0);
-    setLoading(false);
+      setCart(data?.cart || []);
+      setInsights(data?.insights || []);
+      setTotal(data?.total || 0);
+    } catch {
+      setCart([]);
+      setInsights([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const categoryStats = Object.keys(grouped).map((cat) => {
@@ -286,7 +303,11 @@ export default function CartPage() {
               setSaving(true);
               try {
                 await apiClient.get("/api/v1/carts/update-cart");
-                window.location.href = "https://wa.me/917893984343";
+                if (getChannel() === "whatsapp") {
+                  window.location.href = "https://wa.me/917893984343";
+                } else {
+                  router.push("/");
+                }
               } catch {
                 setSaving(false);
               }

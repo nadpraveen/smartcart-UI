@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
+import { getChannel } from "@/lib/utils/channel";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function CheckoutPage() {
 
   const [activeCart, setActiveCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPayment, setSelectedPayment] = useState<string>("");
 
   /* Fetch the user's cart from the backend on mount */
   useEffect(() => {
@@ -36,7 +38,11 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       await apiClient.get("/api/v1/orders/confirm-order");
-      window.location.href = "https://wa.me/917893984343";
+      if (getChannel() === "whatsapp") {
+        window.location.href = "https://wa.me/917893984343";
+      } else {
+        router.push("/");
+      }
     } catch {
       // Error will be displayed via the existing error UI
     } finally {
@@ -97,12 +103,18 @@ export default function CheckoutPage() {
 
           <div className="space-y-2">
             {["UPI", "Card", "Cash on Delivery"].map((m) => (
-              <div
+              <button
                 key={m}
-                className="p-3 border rounded-xl text-sm"
+                type="button"
+                onClick={() => setSelectedPayment(m)}
+                className={`w-full text-left p-3 rounded-xl text-sm border transition active:scale-95 ${
+                  selectedPayment === m
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-gray-700 border-gray-200"
+                }`}
               >
                 {m}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -120,7 +132,7 @@ export default function CheckoutPage() {
         {/* CONFIRM BUTTON */}
         <button
           onClick={handleConfirmOrder}
-          disabled={loading || displayTotal === 0}
+          disabled={loading || displayTotal === 0 || !selectedPayment}
           className="w-full bg-primary text-white p-4 rounded-2xl 
                      font-medium shadow active:scale-95 transition disabled:opacity-50"
         >
