@@ -6,6 +6,7 @@ import { useStore } from "@/store/useStore";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import SessionRedirect from "@/components/ui/sessionRedirect";
+import { getChannel } from "@/lib/utils/channel";
 
 export default function CheckoutTokenPage() {
   const { token } = useParams();
@@ -24,7 +25,8 @@ export default function CheckoutTokenPage() {
 
         if (cancelled) return;
         setUserAfterAuth(data?.response);
-        router.replace("/checkout");
+        const ch = getChannel();
+        router.replace(ch === "whatsapp" ? "/checkout?channel=whatsapp" : "/checkout");
       } catch (err) {
         if (cancelled) return;
 

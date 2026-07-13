@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { getAccessToken } from "@/lib/api/client";
+import { getChannel } from "@/lib/utils/channel";
 
 const BASE = "https://smart-cart-backend-b039.onrender.com";
 
@@ -19,7 +20,11 @@ export default function ProcessingPage() {
         });
         const json = await res.json();
         if (json.success) {
-          window.location.href = "https://wa.me/917893984343";
+          if (getChannel() === "whatsapp") {
+            window.location.href = "https://wa.me/917893984343";
+          } else {
+            router.push("/");
+          }
         } else {
           router.replace("/checkout");
         }
