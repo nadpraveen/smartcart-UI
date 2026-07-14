@@ -7,11 +7,12 @@ import { userApi } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useSyncExternalStore } from "react";
 import { Check } from "lucide-react";
-import { getChannel } from "@/lib/utils/channel";
+// import { getChannel } from "@/lib/utils/channel";
+import { useSearchParams } from "next/navigation";
 
 const ALLERGIES = ["lactose", "nuts", "gluten"] as const;
 const FAMILY_COUNT_OPTIONS = [1, 2, 3, 4];
-const emptySubscribe = () => () => { };
+const emptySubscribe = () => () => {};
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
 
@@ -33,7 +34,14 @@ export default function OnboardingPage() {
     loadPrefs,
   } = useStore();
 
-  const mounted = useSyncExternalStore(emptySubscribe, clientSnapshot, serverSnapshot);
+  const searchParams = useSearchParams();
+  const ch = searchParams.get("ch");
+
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    clientSnapshot,
+    serverSnapshot,
+  );
   const [dataLoaded, setDataLoaded] = useState(false);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -43,12 +51,16 @@ export default function OnboardingPage() {
   const [localCount, setLocalCount] = useState<number>(familyMemberCount);
   const [localCountCustom, setLocalCountCustom] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
-  const [localFoodPref, setLocalFoodPref] = useState<FoodPreference>(foodPreference);
-  const [localAllergies, setLocalAllergies] = useState<string[]>(householdAllergies);
+  const [localFoodPref, setLocalFoodPref] =
+    useState<FoodPreference>(foodPreference);
+  const [localAllergies, setLocalAllergies] =
+    useState<string[]>(householdAllergies);
 
   const [localBudget, setLocalBudget] = useState(preferences.budget);
   const [localMode, setLocalMode] = useState<Mode>(preferences.mode);
-  const [localPlanType, setLocalPlanType] = useState<PlanType>(preferences.planType);
+  const [localPlanType, setLocalPlanType] = useState<PlanType>(
+    preferences.planType,
+  );
 
   const [localAddress, setLocalAddress] = useState(deliveryAddress.address);
   const [localLandmark, setLocalLandmark] = useState(deliveryAddress.landmark);
@@ -120,7 +132,11 @@ export default function OnboardingPage() {
 
   const handleSubmitStep2 = () => {
     if (!canContinueStep2) return;
-    setPreferences({ budget: localBudget, mode: localMode, planType: localPlanType });
+    setPreferences({
+      budget: localBudget,
+      mode: localMode,
+      planType: localPlanType,
+    });
     setStep(3);
   };
 
@@ -157,7 +173,7 @@ export default function OnboardingPage() {
           deliveryAddress: deliveryAddr,
         }),
       ]);
-      if (getChannel() === "whatsapp") {
+      if (ch && ch === "whatsapp") {
         window.location.href = "https://wa.me/917893984343";
       } else {
         router.push("/");
@@ -193,29 +209,28 @@ export default function OnboardingPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2 flex-1">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${s < step
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  s < step
                     ? "bg-primary text-white"
                     : s === step
                       ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-400"
-                  }`}
+                }`}
               >
                 {s < step ? <Check size={16} /> : s}
               </div>
               <span
-                className={`text-xs font-medium ${s <= step ? "text-gray-800" : "text-gray-400"
-                  }`}
+                className={`text-xs font-medium ${
+                  s <= step ? "text-gray-800" : "text-gray-400"
+                }`}
               >
-                {s === 1
-                  ? "Family"
-                  : s === 2
-                    ? "Prefs"
-                    : "Address"}
+                {s === 1 ? "Family" : s === 2 ? "Prefs" : "Address"}
               </span>
               {s < 3 && (
                 <div
-                  className={`flex-1 h-0.5 ${s < step ? "bg-primary" : "bg-gray-200"
-                    }`}
+                  className={`flex-1 h-0.5 ${
+                    s < step ? "bg-primary" : "bg-gray-200"
+                  }`}
                 />
               )}
             </div>
@@ -225,7 +240,9 @@ export default function OnboardingPage() {
         {step === 1 && (
           <div className="space-y-5">
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Your Name</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Your Name
+              </label>
               <input
                 value={localName}
                 onChange={(e) => setLocalName(e.target.value)}
@@ -235,17 +252,20 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Family Members Count</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Family Members Count
+              </label>
               <div className="flex gap-2 flex-wrap">
                 {FAMILY_COUNT_OPTIONS.map((n) => (
                   <button
                     key={n}
                     type="button"
                     onClick={() => handleCountChange(n)}
-                    className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${localCount === n && !showCustomInput
+                    className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${
+                      localCount === n && !showCustomInput
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                      }`}
+                    }`}
                   >
                     {n}
                   </button>
@@ -253,10 +273,11 @@ export default function OnboardingPage() {
                 <button
                   type="button"
                   onClick={() => handleCountChange(5)}
-                  className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${showCustomInput
+                  className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${
+                    showCustomInput
                       ? "bg-primary text-white border-primary"
                       : "bg-white text-gray-700 border-gray-200"
-                    }`}
+                  }`}
                 >
                   5+
                 </button>
@@ -274,26 +295,35 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Food Preference</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Food Preference
+              </label>
               <div className="flex gap-2">
                 {(["veg", "non-veg", "both"] as FoodPreference[]).map((opt) => (
                   <button
                     key={opt}
                     type="button"
                     onClick={() => setLocalFoodPref(opt)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localFoodPref === opt
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
+                      localFoodPref === opt
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                      }`}
+                    }`}
                   >
-                    {opt === "veg" ? "🥦 Veg" : opt === "non-veg" ? "🍗 Non-Veg" : "🍽️ Both"}
+                    {opt === "veg"
+                      ? "🥦 Veg"
+                      : opt === "non-veg"
+                        ? "🍗 Non-Veg"
+                        : "🍽️ Both"}
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Allergies</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Allergies
+              </label>
               <div className="flex gap-2 flex-wrap">
                 {ALLERGIES.map((item) => {
                   const active = localAllergies.includes(item);
@@ -302,10 +332,11 @@ export default function OnboardingPage() {
                       key={item}
                       type="button"
                       onClick={() => toggleAllergy(item)}
-                      className={`px-4 py-2.5 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${active
+                      className={`px-4 py-2.5 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
+                        active
                           ? "bg-primary text-white border-primary"
                           : "bg-white text-gray-700 border-gray-200"
-                        }`}
+                      }`}
                     >
                       {item}
                     </button>
@@ -319,7 +350,9 @@ export default function OnboardingPage() {
         {step === 2 && (
           <div className="space-y-5">
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Budget: ₹{localBudget}</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Budget: ₹{localBudget}
+              </label>
               <input
                 type="range"
                 min={500}
@@ -339,10 +372,11 @@ export default function OnboardingPage() {
                     key={m}
                     type="button"
                     onClick={() => setLocalMode(m)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localMode === m
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
+                      localMode === m
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                      }`}
+                    }`}
                   >
                     {m}
                   </button>
@@ -351,17 +385,20 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Plan Type</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Plan Type
+              </label>
               <div className="flex gap-2">
                 {(["weekly", "monthly"] as PlanType[]).map((p) => (
                   <button
                     key={p}
                     type="button"
                     onClick={() => setLocalPlanType(p)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localPlanType === p
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
+                      localPlanType === p
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                      }`}
+                    }`}
                   >
                     {p}
                   </button>
@@ -374,7 +411,9 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div className="space-y-5">
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Full Address</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Full Address
+              </label>
               <textarea
                 value={localAddress}
                 onChange={(e) => setLocalAddress(e.target.value)}
@@ -385,7 +424,9 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Landmark (optional)</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Landmark (optional)
+              </label>
               <input
                 value={localLandmark}
                 onChange={(e) => setLocalLandmark(e.target.value)}
@@ -395,10 +436,14 @@ export default function OnboardingPage() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block mb-1.5">Pincode</label>
+              <label className="text-sm text-gray-500 block mb-1.5">
+                Pincode
+              </label>
               <input
                 value={localPincode}
-                onChange={(e) => setLocalPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setLocalPincode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 placeholder="6-digit pincode"
                 maxLength={6}
                 inputMode="numeric"
@@ -441,7 +486,9 @@ export default function OnboardingPage() {
         ) : (
           <button
             onClick={handleSubmit}
-            disabled={!localAddress.trim() || !localPincode.trim() || submitting}
+            disabled={
+              !localAddress.trim() || !localPincode.trim() || submitting
+            }
             className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white p-4 rounded-2xl font-medium shadow-lg active:scale-95 transition disabled:opacity-50"
           >
             {submitting ? "Submitting..." : "Submit"}
@@ -453,7 +500,9 @@ export default function OnboardingPage() {
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-40">
           <div className="bg-white p-6 rounded-2xl shadow-xl flex items-center gap-3">
             <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full" />
-            <span className="text-sm font-medium">Saving your information...</span>
+            <span className="text-sm font-medium">
+              Saving your information...
+            </span>
           </div>
         </div>
       )}
