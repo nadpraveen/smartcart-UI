@@ -5,7 +5,7 @@ import { useStore, FoodPreference, Mode, PlanType } from "@/store/useStore";
 import { preferencesApi } from "@/lib/api/preferences";
 import { userApi } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore, Suspense } from "react";
 import { Check } from "lucide-react";
 // import { getChannel } from "@/lib/utils/channel";
 import { useSearchParams } from "next/navigation";
@@ -16,7 +16,17 @@ const emptySubscribe = () => () => {};
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
 
-export default function OnboardingPage() {
+function OnboardingFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function OnboardingPageContent() {
   const router = useRouter();
   const {
     user,
@@ -507,5 +517,13 @@ export default function OnboardingPage() {
         </div>
       )}
     </MobileContainer>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={<OnboardingFallback />}>
+      <OnboardingPageContent />
+    </Suspense>
   );
 }
