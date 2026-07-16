@@ -52,13 +52,12 @@ export default function SlotPage() {
               <button
                 key={slot.id}
                 onClick={() => setSelected(slot.label)}
-                className={`w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all ${
-                  isSelected
+                className={`w-full p-4 rounded-2xl border text-left flex justify-between items-center transition-all ${isSelected
                     ? "bg-primary text-white border-primary shadow-md active:scale-98"
                     : slot.isQuick
-                    ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 hover:border-amber-400 hover:shadow-sm"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
-                }`}
+                      ? "bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300 hover:border-amber-400 hover:shadow-sm"
+                      : "bg-white border-gray-200 hover:bg-gray-50"
+                  }`}
               >
                 <div className="space-y-1">
                   <p className={`font-semibold text-sm ${isSelected ? "text-white" : slot.isQuick ? "text-amber-800" : "text-gray-800"}`}>

@@ -1,7 +1,7 @@
 import { apiClient } from "./client";
 
 export const generateCart = async () => {
-  const res = await apiClient.get("/api/v1/carts");
+  const res = await apiClient.get("/api/v1/carts/active");
 
   console.log(res)
 
