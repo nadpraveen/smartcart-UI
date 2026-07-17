@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
-import { getChannel } from "@/lib/utils/channel";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -38,7 +37,7 @@ export default function CheckoutPage() {
     setLoading(true);
     try {
       await apiClient.get("/api/v1/orders/confirm-order");
-      if (getChannel() === "whatsapp") {
+      if (window.location.search.includes("ch=whatsapp")) {
         window.location.href = "https://wa.me/917893984343";
       } else {
         router.push("/processing");
