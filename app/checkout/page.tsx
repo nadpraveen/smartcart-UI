@@ -41,7 +41,7 @@ export default function CheckoutPage() {
       if (getChannel() === "whatsapp") {
         window.location.href = "https://wa.me/917893984343";
       } else {
-        router.push("/");
+        router.push("/processing");
       }
     } catch {
       // Error will be displayed via the existing error UI
@@ -107,11 +107,10 @@ export default function CheckoutPage() {
                 key={m}
                 type="button"
                 onClick={() => setSelectedPayment(m)}
-                className={`w-full text-left p-3 rounded-xl text-sm border transition active:scale-95 ${
-                  selectedPayment === m
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white text-gray-700 border-gray-200"
-                }`}
+                className={`w-full text-left p-3 rounded-xl text-sm border transition active:scale-95 ${selectedPayment === m
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-200"
+                  }`}
               >
                 {m}
               </button>

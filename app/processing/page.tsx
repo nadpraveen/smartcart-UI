@@ -23,7 +23,7 @@ export default function ProcessingPage() {
           if (getChannel() === "whatsapp") {
             window.location.href = "https://wa.me/917893984343";
           } else {
-            router.push("/");
+            router.push("/success");
           }
         } else {
           router.replace("/checkout");

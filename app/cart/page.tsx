@@ -66,9 +66,9 @@ export default function CartPage() {
       prev.map((i) =>
         i.id === item.id
           ? {
-              ...i,
-              quantity: Math.max(1, (i.quantity || 1) + delta),
-            }
+            ...i,
+            quantity: Math.max(1, (i.quantity || 1) + delta),
+          }
           : i,
       ),
     );
@@ -306,7 +306,7 @@ export default function CartPage() {
                 if (getChannel() === "whatsapp") {
                   window.location.href = "https://wa.me/917893984343";
                 } else {
-                  router.push("/");
+                  router.push("/slot");
                 }
               } catch {
                 setSaving(false);
