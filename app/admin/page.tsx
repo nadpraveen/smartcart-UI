@@ -41,7 +41,7 @@ export default function AdminPage() {
     setMessage("");
 
     try {
-      await apiClient.post("/api/v1/users/register", { name: name.trim(), phone: phone.trim() });
+      await apiClient.post("/api/v1/users/register", { name: name.trim(), phone: `91${phone.trim()}` });
       setMessageType("success");
       setMessage("Saved successfully");
     } catch (err: any) {

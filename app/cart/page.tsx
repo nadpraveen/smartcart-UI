@@ -10,7 +10,6 @@ import ProductCard from "@/components/cart/ProductCard";
 import Skeleton from "@/components/ui/Skeleton";
 import { PieChart, Pie, Tooltip, Cell } from "recharts";
 import CategoryChart from "@/components/charts/CategoryChart";
-import { getChannel } from "@/lib/utils/channel";
 
 export default function CartPage() {
   const router = useRouter();
@@ -303,7 +302,7 @@ export default function CartPage() {
               setSaving(true);
               try {
                 await apiClient.get("/api/v1/carts/update-cart");
-                if (getChannel() === "whatsapp") {
+                if (window.location.search.includes("ch=whatsapp")) {
                   window.location.href = "https://wa.me/917893984343";
                 } else {
                   router.push("/slot");

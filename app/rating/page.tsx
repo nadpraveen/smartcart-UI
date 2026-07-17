@@ -6,7 +6,6 @@ import { apiClient } from "@/lib/api/client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { getChannel } from "@/lib/utils/channel";
 
 export default function RatingPage() {
   const router = useRouter();
@@ -37,7 +36,7 @@ export default function RatingPage() {
 
     try {
       await apiClient.put("/api/v1/carts/rating", { rating, review: review.trim() });
-      if (getChannel() === "whatsapp") {
+      if (window.location.search.includes("ch=whatsapp")) {
         window.location.href = "https://wa.me/917893984343";
       } else {
         router.push("/");
