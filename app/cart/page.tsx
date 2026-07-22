@@ -28,6 +28,7 @@ export default function CartPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [insights, setInsights] = useState<string[]>([]);
+  const [mode, setMode] = useState("monthly");
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,8 +38,27 @@ export default function CartPage() {
       try {
         const res = await generateCart();
         const data = Array.isArray(res) ? res[0] : res;
-        setCart(data?.cart || []);
+        let processedCart = [] as any;
+
+        const finalCart = data?.cart.map((item: any) => {
+          const cartItem = item.options[0];
+          processedCart.push({
+            id: cartItem.id,
+            name: `${cartItem.brand} ${cartItem.product} ${cartItem.qty}`,
+            image: cartItem.image,
+            category: item.category,
+            quantity: item.quantity,
+            unit: item.unit,
+            price: cartItem.price,
+            total: cartItem.total,
+          });
+
+          return processedCart;
+        });
+
+        setCart(processedCart || []);
         setInsights(data?.insights || []);
+        setMode(data.mode);
       } catch {
         setCart([]);
         setInsights([]);
@@ -84,12 +104,14 @@ export default function CartPage() {
     }, 0);
     setTotal(newTotal);
     setCartState(
-      cart.filter((item) => !item.dontSuggest).map((item) => ({
-        name: item.name,
-        price: item.price,
-        category: item.category,
-        quantity: item.quantity,
-      })),
+      cart
+        .filter((item) => !item.dontSuggest)
+        .map((item) => ({
+          name: item.name,
+          price: item.price,
+          category: item.category,
+          quantity: item.quantity,
+        })),
     );
   }, [cart, setCartState]);
 
@@ -110,8 +132,7 @@ export default function CartPage() {
 
   const categoryStats = Object.keys(grouped).map((cat) => {
     const totalCat = grouped[cat].reduce(
-      (sum: number, item: CartItem) =>
-        sum + item.price * (item.quantity || 1),
+      (sum: number, item: CartItem) => sum + item.price * (item.quantity || 1),
       0,
     );
     return { category: cat, value: totalCat };
@@ -194,7 +215,10 @@ export default function CartPage() {
                 <h3 className="font-medium mb-2">AI Insights</h3>
                 <div className="bg-gradient-to-br from-indigo-50 to-white border border-border p-4 rounded-xl space-y-2">
                   {insights.map((text, i) => (
-                    <div key={i} className="text-sm text-gray-700 flex gap-2 items-start">
+                    <div
+                      key={i}
+                      className="text-sm text-gray-700 flex gap-2 items-start"
+                    >
                       <span className="text-primary">•</span>
                       <span>{text}</span>
                     </div>
@@ -216,8 +240,17 @@ export default function CartPage() {
             onClick={async () => {
               if (saving) return;
               setSaving(true);
+              console.log("cart", {
+                cart,
+                insights,
+                mode,
+                total,
+              });
               try {
-                await apiClient.get("/api/v1/carts/update-cart");
+                await apiClient.post("/api/v1/carts/update-cart",{
+
+
+                });
                 if (window.location.search.includes("ch=whatsapp")) {
                   window.location.href = "https://wa.me/917893984343";
                 } else {

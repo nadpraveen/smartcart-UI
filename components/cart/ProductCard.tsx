@@ -68,12 +68,12 @@ export default function ProductCard({
         </p>
 
         <p className="text-xs text-gray-500">
-          ₹{item.price} \u00d7 {qty}
+          ₹{item.price} x {qty}
         </p>
       </div>
 
       <div>
-        <p className="text-sm font-semibold mb-2">\u20b9{total}</p>
+        <p className="text-sm font-semibold mb-2">₹ {total}</p>
 
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 border rounded-lg px-2 py-1">
