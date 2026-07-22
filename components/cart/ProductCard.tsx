@@ -1,16 +1,31 @@
 "use client";
 
-import { useState } from "react";
 import { Plus, Minus, Trash2, Ban } from "lucide-react";
 import { getProductImage } from "@/lib/productImages";
+
+type CartItem = {
+  id: number;
+  name: string;
+  image: string;
+  category: string;
+  quantity: number;
+  unit: string;
+  price: number;
+  total: number;
+  dontSuggest?: boolean;
+};
 
 export default function ProductCard({
   item,
   onRemove,
   onUpdateQty,
-  onSelectBrand,
   onToggleDontSuggest,
-}: any) {
+}: {
+  item: CartItem;
+  onRemove: (item: CartItem) => void;
+  onUpdateQty: (item: CartItem, delta: number) => void;
+  onToggleDontSuggest: (item: CartItem) => void;
+}) {
   const qty = item.quantity || 1;
   const total = item.price * qty;
   const isExcluded = item.dontSuggest;
@@ -36,79 +51,42 @@ export default function ProductCard({
   return (
     <div className="bg-white rounded-2xl shadow-sm p-3 flex flex-col justify-between h-full min-h-[220px] space-y-2">
       <div>
-        {/* IMAGE */}
         <div className="w-full h-24 rounded-xl overflow-hidden bg-gray-100 mb-2">
           <img
-            src={item.image || getProductImage(item)}
+            src={item.image || getProductImage(item.category)}
             className="w-full h-full object-cover"
             alt={item.name}
           />
         </div>
 
-        {/* NAME */}
         <p className="text-sm font-medium leading-tight line-clamp-2">
           {item.name}
         </p>
 
-        {/* QUANTITY */}
         <p className="text-xs text-gray-500">
-          {qty} {item.unit || ""}
+          {qty} {item.unit}
         </p>
 
-        {/* PRICE BREAKDOWN */}
         <p className="text-xs text-gray-500">
-          ₹{item.price} × {qty}
+          ₹{item.price} \u00d7 {qty}
         </p>
-
-        {/* BRAND SELECTOR DROPDOWN */}
-        {item.alternatives && item.alternatives.length > 0 && (
-          <div className="mt-1.5">
-            <select
-              value={item.name}
-              onChange={(e) => {
-                const selectedName = e.target.value;
-                if (selectedName === item.name) return;
-                const chosen = item.alternatives.find((alt: any) => alt.name === selectedName);
-                if (chosen && onSelectBrand) {
-                  onSelectBrand(item, chosen);
-                }
-              }}
-              className="w-full bg-gray-50 border border-gray-200 text-xs rounded-lg px-2 py-1 outline-none focus:border-primary transition font-medium text-gray-700"
-            >
-              <option value={item.name}>{item.name} (₹{item.price})</option>
-              {item.alternatives.map((alt: any, idx: number) => (
-                <option key={idx} value={alt.name}>
-                  {alt.name} (₹{alt.price})
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
 
       <div>
-        <p className="text-sm font-semibold mb-2">
-          ₹{total}
-        </p>
+        <p className="text-sm font-semibold mb-2">\u20b9{total}</p>
 
-        {/* CONTROLS */}
         <div className="flex justify-between items-center">
-          {/* QTY CONTROL */}
           <div className="flex items-center gap-2 border rounded-lg px-2 py-1">
             <button onClick={() => onUpdateQty(item, -1)}>
               <Minus size={14} />
             </button>
-
             <span className="text-sm font-medium">{qty}</span>
-
             <button onClick={() => onUpdateQty(item, +1)}>
               <Plus size={14} />
             </button>
           </div>
 
-          {/* ACTIONS */}
           <div className="flex items-center gap-2">
-            {/* DON'T SUGGEST */}
             <button
               onClick={() => onToggleDontSuggest(item)}
               title="Don't suggest this item"
@@ -116,8 +94,6 @@ export default function ProductCard({
             >
               <Ban size={14} />
             </button>
-
-            {/* REMOVE */}
             <button
               onClick={() => onRemove(item)}
               title="Remove from cart"

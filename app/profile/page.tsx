@@ -11,14 +11,17 @@ export default function ProfilePage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  /* Auth guard — redirect if not logged in */
-  if (!mounted) return null;
-  if (!user.isLoggedIn) {
-    router.replace("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (mounted && !user.isLoggedIn) {
+      router.replace("/login");
+    }
+  }, [mounted, user.isLoggedIn, router]);
+
+  if (!mounted || !user.isLoggedIn) return null;
 
   const handleLogout = () => {
     logout();
