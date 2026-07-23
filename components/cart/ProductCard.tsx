@@ -3,6 +3,18 @@
 import { Plus, Minus, Trash2, Ban } from "lucide-react";
 import { getProductImage } from "@/lib/productImages";
 
+type BrandOption = {
+  id: number;
+  product: string;
+  brand: string;
+  variant: string;
+  image: string;
+  price: number;
+  total: number;
+  unit: string;
+  qty: string;
+};
+
 type CartItem = {
   id: number;
   name: string;
@@ -12,6 +24,8 @@ type CartItem = {
   unit: string;
   price: number;
   total: number;
+  product: string;
+  options: BrandOption[];
   dontSuggest?: boolean;
 };
 
@@ -19,11 +33,13 @@ export default function ProductCard({
   item,
   onRemove,
   onUpdateQty,
+  onOpenBrandPopup,
   onToggleDontSuggest,
 }: {
   item: CartItem;
   onRemove: (item: CartItem) => void;
   onUpdateQty: (item: CartItem, delta: number) => void;
+  onOpenBrandPopup?: (item: CartItem) => void;
   onToggleDontSuggest: (item: CartItem) => void;
 }) {
   const qty = item.quantity || 1;
@@ -70,10 +86,19 @@ export default function ProductCard({
         <p className="text-xs text-gray-500">
           ₹{item.price} x {qty}
         </p>
+
+        {item.options?.length > 1 && onOpenBrandPopup && (
+          <button
+            onClick={() => onOpenBrandPopup(item)}
+            className="mt-2 w-full text-xs border border-blue-400 rounded-lg px-2 py-1.5 text-gray-700 font-medium hover:bg-blue-50 transition active:scale-95"
+          >
+            Change Brand ({item.options.length} options)
+          </button>
+        )}
       </div>
 
       <div>
-        <p className="text-sm font-semibold mb-2">₹ {total}</p>
+        <p className="text-sm font-semibold mb-2">₹{total}</p>
 
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2 border rounded-lg px-2 py-1">
