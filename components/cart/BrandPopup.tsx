@@ -63,11 +63,10 @@ export default function BrandPopup({
                   if (!isActive) onSelect(option);
                 }}
                 disabled={isActive}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition ${
-                  isActive
-                    ? "border-primary bg-primary/5 cursor-default"
-                    : "border-gray-200 hover:border-gray-300 active:scale-[0.98]"
-                }`}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition ${isActive
+                  ? "border-primary bg-primary/5 cursor-default"
+                  : "border-gray-200 hover:border-gray-300 active:scale-[0.98]"
+                  }`}
               >
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                   <img
@@ -81,7 +80,7 @@ export default function BrandPopup({
                   <p className="text-xs text-gray-500">
                     {option.variant} | {option.qty}
                   </p>
-                  <p className="text-sm font-bold mt-0.5">\u20b9{option.price}</p>
+                  <p className="text-sm font-bold mt-0.5">₹{option.price}</p>
                 </div>
                 {isActive ? (
                   <span className="text-xs font-semibold text-primary shrink-0">
