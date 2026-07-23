@@ -40,23 +40,29 @@ export default function CartPage() {
         const data = Array.isArray(res) ? res[0] : res;
         let processedCart = [] as any;
 
-        const finalCart = data?.cart.map((item: any) => {
-          const cartItem = item.options[0];
-          processedCart.push({
-            id: cartItem.id,
-            name: `${cartItem.brand} ${cartItem.product} ${cartItem.qty}`,
-            image: cartItem.image,
-            category: item.category,
-            quantity: item.quantity,
-            unit: item.unit,
-            price: cartItem.price,
-            total: cartItem.total,
+        if (data._id) {
+          setCart(data?.cart || []);
+        } else {
+          data?.cart.map((item: any) => {
+            if (!item.options) return;
+            const cartItem = item.options[0];
+            processedCart.push({
+              id: cartItem.id,
+              name: `${cartItem.brand} ${cartItem.product} ${cartItem.qty}`,
+              image: cartItem.image,
+              category: item.category,
+              quantity: item.quantity,
+              unit: item.unit,
+              price: cartItem.price,
+              total: cartItem.total,
+            });
+
+            // return processedCart;
           });
 
-          return processedCart;
-        });
+          setCart(processedCart);
+        }
 
-        setCart(processedCart || []);
         setInsights(data?.insights || []);
         setMode(data.mode);
       } catch {
@@ -247,10 +253,7 @@ export default function CartPage() {
                 total,
               });
               try {
-                await apiClient.post("/api/v1/carts/update-cart",{
-
-
-                });
+                await apiClient.post("/api/v1/carts/update-cart", {});
                 if (window.location.search.includes("ch=whatsapp")) {
                   window.location.href = "https://wa.me/917893984343";
                 } else {
