@@ -7,8 +7,21 @@ import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
 import { generateCart } from "@/lib/api/cart";
 import ProductCard from "@/components/cart/ProductCard";
+import BrandPopup from "@/components/cart/BrandPopup";
 import Skeleton from "@/components/ui/Skeleton";
 import CategoryChart from "@/components/charts/CategoryChart";
+
+type BrandOption = {
+  id: number;
+  product: string;
+  brand: string;
+  variant: string;
+  image: string;
+  price: number;
+  total: number;
+  unit: string;
+  qty: string;
+};
 
 type CartItem = {
   id: number;
@@ -19,6 +32,8 @@ type CartItem = {
   unit: string;
   price: number;
   total: number;
+  product: string;
+  options: BrandOption[];
   dontSuggest?: boolean;
 };
 
@@ -32,31 +47,31 @@ export default function CartPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [popupItem, setPopupItem] = useState<CartItem | null>(null);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const res = await generateCart();
         const data = Array.isArray(res) ? res[0] : res;
-        let processedCart = [] as any;
 
-        const finalCart = data?.cart.map((item: any) => {
-          const cartItem = item.options[0];
-          processedCart.push({
-            id: cartItem.id,
-            name: `${cartItem.brand} ${cartItem.product} ${cartItem.qty}`,
-            image: cartItem.image,
+        const items = (data?.cart || []).map((item: any) => {
+          const defaultOption = item.options?.[0] || {};
+          return {
+            id: defaultOption.id,
+            name: `${defaultOption.brand || ""} ${item.product}`.trim(),
+            image: defaultOption.image || "",
             category: item.category,
-            quantity: item.quantity,
-            unit: item.unit,
-            price: cartItem.price,
-            total: cartItem.total,
-          });
-
-          return processedCart;
+            quantity: item.quantity || 1,
+            unit: item.unit || "",
+            price: defaultOption.price || 0,
+            total: defaultOption.total || 0,
+            product: item.product,
+            options: item.options || [],
+          };
         });
 
-        setCart(processedCart || []);
+        setCart(items);
         setInsights(data?.insights || []);
         setMode(data.mode);
       } catch {
@@ -87,6 +102,24 @@ export default function CartPage() {
           : i,
       ),
     );
+  };
+
+  const handleBrandChange = (item: CartItem, option: BrandOption) => {
+    setCart((prev) =>
+      prev.map((i) =>
+        i.id === item.id
+          ? {
+            ...i,
+            id: option.id,
+            name: `${option.brand} ${item.product}`.trim(),
+            image: option.image || i.image,
+            price: option.price,
+            total: option.total,
+          }
+          : i,
+      ),
+    );
+    setPopupItem(null);
   };
 
   const handleToggleDontSuggest = (item: CartItem) => {
@@ -120,7 +153,22 @@ export default function CartPage() {
     try {
       const res = await generateCart();
       const data = Array.isArray(res) ? res[0] : res;
-      setCart(data?.cart || []);
+      const items = (data?.cart || []).map((item: any) => {
+        const defaultOption = item.options?.[0] || {};
+        return {
+          id: defaultOption.id,
+          name: `${defaultOption.brand || ""} ${item.product}`.trim(),
+          image: defaultOption.image || "",
+          category: item.category,
+          quantity: item.quantity || 1,
+          unit: item.unit || "",
+          price: defaultOption.price || 0,
+          total: defaultOption.total || 0,
+          product: item.product,
+          options: item.options || [],
+        };
+      });
+      setCart(items);
       setInsights(data?.insights || []);
     } catch {
       setCart([]);
@@ -181,6 +229,7 @@ export default function CartPage() {
                       item={item}
                       onRemove={handleRemove}
                       onUpdateQty={handleQty}
+                      onOpenBrandPopup={setPopupItem}
                       onToggleDontSuggest={handleToggleDontSuggest}
                     />
                   ))}
@@ -192,7 +241,7 @@ export default function CartPage() {
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Budget Usage</span>
                 <span className="font-medium">
-                  ₹{total} / ₹{preferences.budget}
+                  ₹{total} /{preferences.budget}
                 </span>
               </div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -240,16 +289,22 @@ export default function CartPage() {
             onClick={async () => {
               if (saving) return;
               setSaving(true);
-              console.log("cart", {
-                cart,
-                insights,
-                mode,
-                total,
-              });
               try {
-                await apiClient.post("/api/v1/carts/update-cart",{
-
-
+                await apiClient.post("/api/v1/carts/update-cart", {
+                  cart: cart
+                    .filter((item) => !item.dontSuggest)
+                    .map((item) => ({
+                      id: item.id,
+                      name: item.name,
+                      category: item.category,
+                      quantity: item.quantity,
+                      unit: item.unit,
+                      price: item.price,
+                      total: item.price * item.quantity,
+                    })),
+                  insights,
+                  mode,
+                  total,
                 });
                 if (window.location.search.includes("ch=whatsapp")) {
                   window.location.href = "https://wa.me/917893984343";
@@ -266,6 +321,17 @@ export default function CartPage() {
             {saving ? "Processing..." : "Done \u2192"}
           </button>
         </div>
+      )}
+
+      {popupItem && (
+        <BrandPopup
+          category={popupItem.category}
+          product={popupItem.product}
+          options={popupItem.options}
+          currentBrandId={popupItem.id}
+          onSelect={(option) => handleBrandChange(popupItem, option)}
+          onClose={() => setPopupItem(null)}
+        />
       )}
     </MobileContainer>
   );
