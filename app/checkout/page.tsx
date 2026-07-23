@@ -8,7 +8,7 @@ import { apiClient } from "@/lib/api/client";
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cartTotal } = useStore();
+  const { cartTotal, deliveryAddress, user } = useStore();
 
   const [activeCart, setActiveCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,9 @@ export default function CheckoutPage() {
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <p className="text-sm text-gray-500">Delivery Address</p>
           <p className="font-medium mt-1">
-            Praveen Kumar, Rajahmundry, AP
+            {deliveryAddress?.address
+              ? `${user.name}, ${deliveryAddress.address}${deliveryAddress.landmark ? `, ${deliveryAddress.landmark}` : ""}, ${deliveryAddress.pincode}`
+              : "No address set"}
           </p>
         </div>
 

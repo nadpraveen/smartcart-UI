@@ -2,6 +2,7 @@
 
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore, FoodPreference, Mode, PlanType } from "@/store/useStore";
+import { authApi } from "@/lib/api/auth";
 import { preferencesApi } from "@/lib/api/preferences";
 import { userApi } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
@@ -42,6 +43,7 @@ function OnboardingPageContent() {
     setPreferences,
     loadProfile,
     loadPrefs,
+    setUserAfterAuth,
   } = useStore();
 
   const searchParams = useSearchParams();
@@ -80,7 +82,21 @@ function OnboardingPageContent() {
     if (!mounted) return;
     let cancelled = false;
 
-    Promise.all([loadProfile(), loadPrefs()]).finally(() => {
+    const init = async () => {
+      // Partner flow: auto-login via findOrCreate before loading profile
+      if (ch === "partner") {
+        const phone = searchParams.get("phone");
+        if (phone) {
+          try {
+            const data = await authApi.partnerLogin({ phone });
+            setUserAfterAuth(data);
+          } catch (err) {
+            console.error("Partner login failed", err);
+          }
+        }
+      }
+
+      await Promise.all([loadProfile(), loadPrefs()]);
       if (cancelled) return;
 
       const state = useStore.getState();
@@ -95,12 +111,14 @@ function OnboardingPageContent() {
       setLocalLandmark(state.deliveryAddress.landmark);
       setLocalPincode(state.deliveryAddress.pincode);
       setDataLoaded(true);
-    });
+    };
+
+    init();
 
     return () => {
       cancelled = true;
     };
-  }, [mounted, loadProfile, loadPrefs]);
+  }, [mounted, ch, searchParams, loadProfile, loadPrefs, setUserAfterAuth]);
 
   useEffect(() => {
     if (dataLoaded && !user.isLoggedIn) {
@@ -185,6 +203,9 @@ function OnboardingPageContent() {
       ]);
       if (ch && ch === "whatsapp") {
         window.location.href = "https://wa.me/917893984343";
+      } else if (ch === "partner") {
+        const phone = searchParams.get("phone");
+        router.push(`/cart?ch=partner&phone=${phone}`);
       } else {
         router.push("/");
       }

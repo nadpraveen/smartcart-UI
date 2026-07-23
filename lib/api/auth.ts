@@ -15,4 +15,8 @@ export const authApi = {
 
   generateSecureToken: (data: { sessionToken: string }) =>
     apiClient.post('/api/v1/users/genSecureWhatsappToken', data),
+
+  /* Partner login — findOrCreate, no OTP */
+  partnerLogin: (data: { phone: string }) =>
+    apiClient.post("/api/v1/auth/partner-login", data),
 };
