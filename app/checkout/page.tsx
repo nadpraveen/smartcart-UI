@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
+import { useSearchParams } from "next/navigation";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -13,6 +14,12 @@ export default function CheckoutPage() {
   const [activeCart, setActiveCart] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPayment, setSelectedPayment] = useState<string>("");
+  const searchParams = useSearchParams();
+
+  const ch = searchParams.get("ch");
+  const phone = searchParams.get("phone");
+
+  const navPath = `/processing?ch=${ch ? ch : ""}&phone=${phone ? phone : ""}`;
 
   /* Fetch the user's cart from the backend on mount */
   useEffect(() => {
@@ -40,7 +47,7 @@ export default function CheckoutPage() {
       if (window.location.search.includes("ch=whatsapp")) {
         window.location.href = "https://wa.me/917893984343";
       } else {
-        router.push("/processing");
+        router.push(navPath);
       }
     } catch {
       // Error will be displayed via the existing error UI
@@ -54,9 +61,7 @@ export default function CheckoutPage() {
       <div className="p-5 space-y-6">
         <div>
           <h2 className="text-xl font-semibold">Checkout 💳</h2>
-          <p className="text-sm text-gray-500">
-            Confirm your order details
-          </p>
+          <p className="text-sm text-gray-500">Confirm your order details</p>
         </div>
 
         {/* Loading state */}
@@ -98,9 +103,7 @@ export default function CheckoutPage() {
 
         {/* PAYMENT METHOD */}
         <div className="bg-white p-4 rounded-xl shadow-sm">
-          <p className="text-sm text-gray-500 mb-2">
-            Payment Method
-          </p>
+          <p className="text-sm text-gray-500 mb-2">Payment Method</p>
 
           <div className="space-y-2">
             {["UPI", "Card", "Cash on Delivery"].map((m) => (
@@ -108,10 +111,11 @@ export default function CheckoutPage() {
                 key={m}
                 type="button"
                 onClick={() => setSelectedPayment(m)}
-                className={`w-full text-left p-3 rounded-xl text-sm border transition active:scale-95 ${selectedPayment === m
-                  ? "bg-primary text-white border-primary"
-                  : "bg-white text-gray-700 border-gray-200"
-                  }`}
+                className={`w-full text-left p-3 rounded-xl text-sm border transition active:scale-95 ${
+                  selectedPayment === m
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white text-gray-700 border-gray-200"
+                }`}
               >
                 {m}
               </button>
@@ -123,9 +127,7 @@ export default function CheckoutPage() {
         <div className="bg-white p-4 rounded-xl shadow-sm">
           <div className="flex justify-between text-sm">
             <span>Total</span>
-            <span className="font-semibold">
-              ₹{displayTotal}
-            </span>
+            <span className="font-semibold">₹{displayTotal}</span>
           </div>
         </div>
 

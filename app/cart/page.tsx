@@ -11,6 +11,7 @@ import BrandPopup from "@/components/cart/BrandPopup";
 import RegenerateConfirm from "@/components/cart/RegenerateConfirm";
 import Skeleton from "@/components/ui/Skeleton";
 import CategoryChart from "@/components/charts/CategoryChart";
+import { useSearchParams } from "next/navigation";
 
 type BrandOption = {
   id: number;
@@ -50,6 +51,11 @@ export default function CartPage() {
   const [saving, setSaving] = useState(false);
   const [popupItem, setPopupItem] = useState<CartItem | null>(null);
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
+  const searchParams = useSearchParams();
+  const ch = searchParams.get("ch");
+  const phone = searchParams.get("phone");
+
+  const navPath = `/slot?ch=${ch ? ch : ""}&phone=${phone ? phone : ""}`
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -324,7 +330,7 @@ export default function CartPage() {
                 if (window.location.search.includes("ch=whatsapp")) {
                   window.location.href = "https://wa.me/917893984343";
                 } else {
-                  router.push("/slot");
+                  router.push(navPath);
                 }
               } catch {
                 setSaving(false);
