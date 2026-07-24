@@ -242,7 +242,7 @@ function CartPageContent() {
           <>
             <button
               onClick={handleRegenerate}
-              className="w-full text-xs bg-gray-100 rounded-xl p-2 mb-4"
+              className="w-full text-xs bg-primary/10 text-primary rounded-xl p-2 mb-4"
             >
               Regenerate Cart
             </button>
