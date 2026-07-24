@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 
 const ALLERGIES = ["lactose", "nuts", "gluten"] as const;
 const FAMILY_COUNT_OPTIONS = [1, 2, 3, 4];
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => { };
 const clientSnapshot = () => true;
 const serverSnapshot = () => false;
 
@@ -144,7 +144,7 @@ function OnboardingPageContent() {
     }
   };
 
-  const canContinueStep1 = localName.trim().length >= 1 && localCount > 0;
+  const canContinueStep1 = localName?.trim()?.length >= 1 && localCount > 0;
   const canContinueStep2 = localBudget >= 100;
 
   const handleSubmitStep1 = () => {
@@ -240,28 +240,25 @@ function OnboardingPageContent() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center gap-2 flex-1">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                  s < step
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${s < step
                     ? "bg-primary text-white"
                     : s === step
                       ? "bg-primary text-white"
                       : "bg-gray-100 text-gray-400"
-                }`}
+                  }`}
               >
                 {s < step ? <Check size={16} /> : s}
               </div>
               <span
-                className={`text-xs font-medium ${
-                  s <= step ? "text-gray-800" : "text-gray-400"
-                }`}
+                className={`text-xs font-medium ${s <= step ? "text-gray-800" : "text-gray-400"
+                  }`}
               >
                 {s === 1 ? "Family" : s === 2 ? "Prefs" : "Address"}
               </span>
               {s < 3 && (
                 <div
-                  className={`flex-1 h-0.5 ${
-                    s < step ? "bg-primary" : "bg-gray-200"
-                  }`}
+                  className={`flex-1 h-0.5 ${s < step ? "bg-primary" : "bg-gray-200"
+                    }`}
                 />
               )}
             </div>
@@ -292,11 +289,10 @@ function OnboardingPageContent() {
                     key={n}
                     type="button"
                     onClick={() => handleCountChange(n)}
-                    className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${
-                      localCount === n && !showCustomInput
+                    className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${localCount === n && !showCustomInput
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                    }`}
+                      }`}
                   >
                     {n}
                   </button>
@@ -304,11 +300,10 @@ function OnboardingPageContent() {
                 <button
                   type="button"
                   onClick={() => handleCountChange(5)}
-                  className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${
-                    showCustomInput
+                  className={`w-12 h-12 rounded-xl border text-sm font-medium transition active:scale-95 ${showCustomInput
                       ? "bg-primary text-white border-primary"
                       : "bg-white text-gray-700 border-gray-200"
-                  }`}
+                    }`}
                 >
                   5+
                 </button>
@@ -335,11 +330,10 @@ function OnboardingPageContent() {
                     key={opt}
                     type="button"
                     onClick={() => setLocalFoodPref(opt)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
-                      localFoodPref === opt
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localFoodPref === opt
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                    }`}
+                      }`}
                   >
                     {opt === "veg"
                       ? "🥦 Veg"
@@ -363,11 +357,10 @@ function OnboardingPageContent() {
                       key={item}
                       type="button"
                       onClick={() => toggleAllergy(item)}
-                      className={`px-4 py-2.5 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
-                        active
+                      className={`px-4 py-2.5 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${active
                           ? "bg-primary text-white border-primary"
                           : "bg-white text-gray-700 border-gray-200"
-                      }`}
+                        }`}
                     >
                       {item}
                     </button>
@@ -403,11 +396,10 @@ function OnboardingPageContent() {
                     key={m}
                     type="button"
                     onClick={() => setLocalMode(m)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
-                      localMode === m
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localMode === m
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                    }`}
+                      }`}
                   >
                     {m}
                   </button>
@@ -425,11 +417,10 @@ function OnboardingPageContent() {
                     key={p}
                     type="button"
                     onClick={() => setLocalPlanType(p)}
-                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${
-                      localPlanType === p
+                    className={`flex-1 p-3 rounded-xl border text-sm font-medium capitalize transition active:scale-95 ${localPlanType === p
                         ? "bg-primary text-white border-primary"
                         : "bg-white text-gray-700 border-gray-200"
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>
