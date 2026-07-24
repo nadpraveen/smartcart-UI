@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
@@ -39,7 +39,17 @@ type CartItem = {
   dontSuggest?: boolean;
 };
 
-export default function CartPage() {
+function CartFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function CartPageContent() {
   const router = useRouter();
   const { preferences, setCartState } = useStore();
 
@@ -362,5 +372,13 @@ export default function CartPage() {
         />
       )}
     </MobileContainer>
+  );
+}
+
+export default function CartPage() {
+  return (
+    <Suspense fallback={<CartFallback />}>
+      <CartPageContent />
+    </Suspense>
   );
 }

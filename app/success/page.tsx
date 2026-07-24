@@ -3,9 +3,19 @@
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function SuccessPage() {
+function SuccessFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function SuccessPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -60,5 +70,13 @@ export default function SuccessPage() {
         </button> */}
       </div>
     </MobileContainer>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<SuccessFallback />}>
+      <SuccessPageContent />
+    </Suspense>
   );
 }

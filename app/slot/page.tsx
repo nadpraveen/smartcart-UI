@@ -2,10 +2,20 @@
 
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function SlotPage() {
+function SlotFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function SlotPageContent() {
   const router = useRouter();
   const [selected, setSelected] = useState("");
   const searchParams = useSearchParams();
@@ -103,5 +113,13 @@ export default function SlotPage() {
         </button>
       </div>
     </MobileContainer>
+  );
+}
+
+export default function SlotPage() {
+  return (
+    <Suspense fallback={<SlotFallback />}>
+      <SlotPageContent />
+    </Suspense>
   );
 }

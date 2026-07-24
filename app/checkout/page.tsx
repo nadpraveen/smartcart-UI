@@ -1,13 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
 import { useSearchParams } from "next/navigation";
 
-export default function CheckoutPage() {
+function CheckoutFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function CheckoutPageContent() {
   const router = useRouter();
   const { cartTotal, deliveryAddress, user } = useStore();
 
@@ -142,5 +152,13 @@ export default function CheckoutPage() {
         </button>
       </div>
     </MobileContainer>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutFallback />}>
+      <CheckoutPageContent />
+    </Suspense>
   );
 }

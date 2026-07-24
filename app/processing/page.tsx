@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { getAccessToken } from "@/lib/api/client";
@@ -9,7 +9,17 @@ import { useSearchParams } from "next/navigation";
 
 const BASE = "https://smart-cart-backend-b039.onrender.com";
 
-export default function ProcessingPage() {
+function ProcessingFallback() {
+  return (
+    <MobileContainer>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+      </div>
+    </MobileContainer>
+  );
+}
+
+function ProcessingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -57,5 +67,13 @@ export default function ProcessingPage() {
         <p className="text-sm text-gray-500 mt-1">Please wait</p>
       </div>
     </MobileContainer>
+  );
+}
+
+export default function ProcessingPage() {
+  return (
+    <Suspense fallback={<ProcessingFallback />}>
+      <ProcessingPageContent />
+    </Suspense>
   );
 }
