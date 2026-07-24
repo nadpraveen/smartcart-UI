@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import MobileContainer from "@/components/layout/MobileContainer";
 import { useStore } from "@/store/useStore";
 import { apiClient } from "@/lib/api/client";
-import { generateCart } from "@/lib/api/cart";
+import { generateCart, regenerateCart } from "@/lib/api/cart";
 import ProductCard from "@/components/cart/ProductCard";
 import BrandPopup from "@/components/cart/BrandPopup";
+import RegenerateConfirm from "@/components/cart/RegenerateConfirm";
 import Skeleton from "@/components/ui/Skeleton";
 import CategoryChart from "@/components/charts/CategoryChart";
 
@@ -48,6 +49,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [popupItem, setPopupItem] = useState<CartItem | null>(null);
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -155,10 +157,15 @@ export default function CartPage() {
     );
   }, [cart, setCartState]);
 
-  const handleRegenerate = async () => {
+  const handleRegenerate = () => {
+    setShowRegenConfirm(true);
+  };
+
+  const handleRegenerateConfirmed = async () => {
+    setShowRegenConfirm(false);
     setLoading(true);
     try {
-      const res = await generateCart();
+      const res = await regenerateCart();
       const data = Array.isArray(res) ? res[0] : res;
       const items = (data?.cart || []).map((item: any) => {
         const defaultOption = item.options?.[0] || {};
@@ -339,6 +346,13 @@ export default function CartPage() {
           currentBrandId={popupItem.id}
           onSelect={(option) => handleBrandChange(popupItem, option)}
           onClose={() => setPopupItem(null)}
+        />
+      )}
+
+      {showRegenConfirm && (
+        <RegenerateConfirm
+          onConfirm={handleRegenerateConfirmed}
+          onClose={() => setShowRegenConfirm(false)}
         />
       )}
     </MobileContainer>
